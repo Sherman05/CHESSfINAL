@@ -705,6 +705,7 @@ class ChessT1App:
             "move_number": self.move_number,
             "party_folder": self.party_folder,
             "board_reversed": self.board_reversed,
+            "analysis_first_white": self.analysis_first_white,
         })
 
     def _restore_session(self, data):
@@ -716,6 +717,7 @@ class ChessT1App:
         self.move_number = data.get("move_number", 1)
         self.party_folder = data.get("party_folder")
         self.board_reversed = data.get("board_reversed", False)
+        self.analysis_first_white = data.get("analysis_first_white", True)
 
         position = data.get("position", {})
         self.board.reversed = self.board_reversed

@@ -40,8 +40,6 @@ def load_config():
     except (FileNotFoundError, json.JSONDecodeError):
         return {
             "skip_intro": False,
-            "window_width": 900,
-            "window_height": 700,
         }
 
 
