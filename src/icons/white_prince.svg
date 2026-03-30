@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 45 50">
+  <!-- Prince (Принц) - White - Bishop analogue with mitre hat -->
+  <!-- Mitre top point -->
+  <path d="M22.5 3 L18 15 L27 15 Z"
+        fill="#fff" stroke="#333" stroke-width="1.5" stroke-linejoin="round"/>
+  <!-- Slit in mitre -->
+  <line x1="22.5" y1="7" x2="22.5" y2="13" stroke="#333" stroke-width="1.2"/>
+  <!-- Head bulge -->
+  <ellipse cx="22.5" cy="17" rx="8" ry="4" fill="#fff" stroke="#333" stroke-width="1.5"/>
+  <!-- Collar -->
+  <path d="M16 20 L15 24 L30 24 L29 20"
+        fill="#fff" stroke="#333" stroke-width="1.5" stroke-linejoin="round"/>
+  <!-- Body - narrower than king/queen -->
+  <path d="M15 24 Q14 30 13 38 L32 38 Q31 30 30 24 Z"
+        fill="#fff" stroke="#333" stroke-width="1.5" stroke-linejoin="round"/>
+  <!-- Diagonal sash -->
+  <line x1="18" y1="25" x2="27" y2="36" stroke="#333" stroke-width="1.2"/>
+  <!-- Base -->
+  <path d="M11 38 L11 42 Q11 45 14 45 L31 45 Q34 45 34 42 L34 38 Z"
+        fill="#fff" stroke="#333" stroke-width="1.5" stroke-linejoin="round"/>
+  <line x1="11" y1="41" x2="34" y2="41" stroke="#333" stroke-width="1"/>
+</svg>

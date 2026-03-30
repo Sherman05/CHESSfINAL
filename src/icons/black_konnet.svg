@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 45 50">
+  <!-- Konnet (Коннет) - Black - Queen analogue with pointed crown -->
+  <!-- Crown points -->
+  <path d="M12 18 L15 6 L19 14 L22.5 3 L26 14 L30 6 L33 18 Z"
+        fill="#333" stroke="#ccc" stroke-width="1.5" stroke-linejoin="round"/>
+  <!-- Crown jewels (circles on tips) -->
+  <circle cx="15" cy="5.5" r="1.8" fill="#333" stroke="#ccc" stroke-width="1.2"/>
+  <circle cx="22.5" cy="2.5" r="1.8" fill="#333" stroke="#ccc" stroke-width="1.2"/>
+  <circle cx="30" cy="5.5" r="1.8" fill="#333" stroke="#ccc" stroke-width="1.2"/>
+  <!-- Head band -->
+  <rect x="12" y="18" width="21" height="4" rx="1" fill="#333" stroke="#ccc" stroke-width="1.5"/>
+  <!-- Body -->
+  <path d="M14 22 Q12 30 11 38 L34 38 Q33 30 31 22 Z"
+        fill="#333" stroke="#ccc" stroke-width="1.5" stroke-linejoin="round"/>
+  <!-- Body decoration lines -->
+  <line x1="16" y1="26" x2="29" y2="26" stroke="#ccc" stroke-width="0.8"/>
+  <line x1="15" y1="31" x2="30" y2="31" stroke="#ccc" stroke-width="0.8"/>
+  <!-- Base -->
+  <path d="M9 38 L9 42 Q9 45 13 45 L32 45 Q36 45 36 42 L36 38 Z"
+        fill="#333" stroke="#ccc" stroke-width="1.5" stroke-linejoin="round"/>
+  <line x1="9" y1="41" x2="36" y2="41" stroke="#ccc" stroke-width="1"/>
+</svg>
