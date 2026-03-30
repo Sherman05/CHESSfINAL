@@ -5,6 +5,8 @@ Design matches the mockup: "Вводная страница ГИ chess-Т1 2026"
 
 import tkinter as tk
 from tkinter import font as tkfont
+import os
+import sys
 
 
 INTRO_TEXT = """Как пользоваться программой ГИ chess-T1
@@ -99,6 +101,30 @@ INTRO_TEXT = """Как пользоваться программой ГИ chess-
 Приятной игры!
 """
 
+
+def _load_intro_text():
+    """Load intro text from external file if available.
+    Looks for 'intro_text.txt' in assets/ directory.
+    Falls back to built-in INTRO_TEXT.
+    """
+    if getattr(sys, 'frozen', False):
+        base = sys._MEIPASS
+    else:
+        base = os.path.dirname(os.path.abspath(__file__))
+
+    for path in [
+        os.path.join(base, "assets", "intro_text.txt"),
+        os.path.join(base, "..", "assets", "intro_text.txt"),
+    ]:
+        if os.path.isfile(path):
+            try:
+                with open(path, "r", encoding="utf-8") as f:
+                    return f.read()
+            except Exception:
+                pass
+    return INTRO_TEXT
+
+
 # Colors matching the PDF mockup
 COLOR_FRAME_BG = "#4A90C8"       # Blue frame background
 COLOR_TEXT_BG = "#D4C9A8"        # Beige/tan text area background
@@ -132,6 +158,7 @@ class IntroPage(tk.Toplevel):
         self.resizable(True, True)
         self.transient(parent)
         self.grab_set()
+        self.bind("<Escape>", lambda e: self._close())
 
         self._build_ui()
 
@@ -222,7 +249,7 @@ class IntroPage(tk.Toplevel):
         self.text_widget.pack(fill="both", expand=True)
         scrollbar.config(command=self.text_widget.yview)
 
-        self.text_widget.insert("1.0", INTRO_TEXT)
+        self.text_widget.insert("1.0", _load_intro_text())
         self.text_widget.config(state="disabled")
 
         # Resize grip (bottom right corner)

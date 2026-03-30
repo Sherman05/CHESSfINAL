@@ -81,6 +81,9 @@ class GameBoard(tk.Canvas):
             self.board_y = int(new_size * 0.57)
             self.load_piece_images()
             self.redraw()
+            # Notify app to update trays if visible
+            if hasattr(self.app, '_update_trays_on_resize'):
+                self.app._update_trays_on_resize()
 
     def load_piece_images(self):
         """Load and scale piece images."""
@@ -563,29 +566,23 @@ class GameBoard(tk.Canvas):
         return False
 
     def _show_exit_arrow(self, px, py):
-        """Show horizontal double arrow at the nearest board edge (spec 7.6)."""
+        """Show horizontal double arrow at the nearest board edge (spec 7.6).
+        Drawn as a canvas line with arrowheads, not a Unicode character.
+        """
         board_left = self.board_x
         board_right = self.board_x + 8 * self.cell_size
         board_top = self.board_y
         board_bottom = self.board_y + 8 * self.cell_size
 
-        # Find nearest edge point
+        # Clamp to nearest edge
         cx = max(board_left, min(px, board_right))
         cy = max(board_top, min(py, board_bottom))
-        # Clamp to edge
-        if px < board_left:
-            cx = board_left
-        elif px > board_right:
-            cx = board_right
-        if py < board_top:
-            cy = board_top
-        elif py > board_bottom:
-            cy = board_bottom
 
-        arrow_size = self.cell_size // 2
-        self.create_text(
-            cx, cy, text="\u2194", font=("Arial", arrow_size, "bold"),
-            fill="#CC0000", tags="exit_arrow"
+        half = self.cell_size // 3
+        self.create_line(
+            cx - half, cy, cx + half, cy,
+            fill="#CC0000", width=3, arrow="both",
+            arrowshape=(8, 10, 4), tags="exit_arrow"
         )
         # Auto-remove after 2 seconds
         self.after(2000, lambda: self.delete("exit_arrow"))

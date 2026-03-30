@@ -46,6 +46,7 @@ class CreateFolderDialog(tk.Toplevel):
         self.configure(bg="#F5F5F5")
 
         self.protocol("WM_DELETE_WINDOW", self._cancel)
+        self.bind("<Escape>", lambda e: self._cancel())
 
         self._build_ui()
         self.wait_visibility()
@@ -256,6 +257,7 @@ class EndSessionDialog(tk.Toplevel):
         self.grab_set()
         self.configure(bg="#F5F5F5")
         self.protocol("WM_DELETE_WINDOW", self._cancel)
+        self.bind("<Escape>", lambda e: self._cancel())
 
         self._build_ui()
 
@@ -312,6 +314,7 @@ class CloseAppDialog(tk.Toplevel):
         self.grab_set()
         self.configure(bg="#F5F5F5")
         self.protocol("WM_DELETE_WINDOW", self._cancel)
+        self.bind("<Escape>", lambda e: self._cancel())
 
         self._build_ui()
 
@@ -392,6 +395,7 @@ class SaveAsDialog(tk.Toplevel):
         self.grab_set()
         self.configure(bg="#F5F5F5")
         self.protocol("WM_DELETE_WINDOW", self._cancel)
+        self.bind("<Escape>", lambda e: self._cancel())
 
         frame = tk.Frame(self, bg="#F5F5F5", padx=20, pady=20)
         frame.pack(fill="both", expand=True)
