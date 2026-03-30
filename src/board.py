@@ -16,15 +16,15 @@ from pieces import (
     PIECE_FULL_NAMES, ICON_FILES
 )
 
-# Colors
-COLOR_WHITE_CELL = "#F0D9B5"
-COLOR_BLACK_CELL = "#B58863"
-COLOR_CASTLE_CELL = "#D3D3D3"
+# Colors — matching the PDF mockup "Расширенный вид ГИ"
+COLOR_WHITE_CELL = "#FFFFFF"      # White cells (pure white per mockup)
+COLOR_BLACK_CELL = "#C0C0C0"      # Black cells (grey per mockup)
+COLOR_CASTLE_CELL = "#E8E8E8"     # Castle cells (light grey, distinct from both)
 COLOR_HIGHLIGHT_START = "#FFFF00"
 COLOR_HIGHLIGHT_HOVER = "#90EE90"
 COLOR_HIGHLIGHT_LAST = "#CED26B"
-COLOR_BORDER = "#4682B4"
-COLOR_NOTATION = "#4682B4"
+COLOR_BORDER = "#4A90C8"          # Blue border (matching mockup frame)
+COLOR_NOTATION = "#1A237E"        # Dark blue notation text
 
 
 class GameBoard(tk.Canvas):

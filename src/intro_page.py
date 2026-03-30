@@ -1,6 +1,6 @@
 """
 Intro page (A00) for chess-T1.
-Shows introductory text about how to use the program.
+Design matches the mockup: "Вводная страница ГИ chess-Т1 2026"
 """
 
 import tkinter as tk
@@ -8,62 +8,65 @@ from tkinter import font as tkfont
 
 
 INTRO_TEXT = """Как пользоваться программой ГИ chess-T1
+(вводный текст)
 
-Добро пожаловать в графический интерфейс для настольной игры chess-T1!
+Настоящая программа ГИ chess-T1 (Графический интерфейс) пользователям игры chess-T1 предоставляет возможности с помощью компьютера:
 
-Эта программа позволяет:
-• Играть вдвоём за одним компьютером
-• Анализировать позиции и партии
+(1) последовательно (пользователям) проводить анализ партий и позиций игры chess-T1.
+
+(2) двум пользователям играть между собой в игру chess-T1.
+
+Предполагается, что пользователи знают и соблюдают при использовании ГИ chess-T1 правила игры.
 
 ОСНОВНЫЕ ЭЛЕМЕНТЫ ИНТЕРФЕЙСА
 
 Игровое поле — доска 8×8 с буквенно-цифровой нотацией (вертикали a–h, горизонтали 1–8).
 
 Клетки замков — выделены светло-серым цветом:
-  • Замок белых: c1, d1, e1, f1
-  • Замок чёрных: c8, d8, e8, f8
+  \u2022 Замок белых: c1, d1, e1, f1
+  \u2022 Замок чёрных: c8, d8, e8, f8
 
 ФИГУРЫ
 
 В игре 7 видов фигур для каждого цвета:
-  • Король (Кр) — королевская фигура
-  • Коннет (Кт) — королевская фигура
-  • Принц (Пр) — королевская фигура, может превращаться
-  • Риттер (Рт) — боевая фигура
-  • Кнехт (Кн) — пехота, превращается в Вер Кнехта
-  • Вер Кнехт (ВК) — ветеран, превращается далее
-  • Разведчик (Рк) — особый ход: взятие с разменом
+  \u2022 Король (Кр) — королевская фигура
+  \u2022 Коннет (Кт) — королевская фигура
+  \u2022 Принц (Пр) — королевская фигура, может превращаться
+  \u2022 Риттер (Рт) — боевая фигура
+  \u2022 Кнехт (Кн) — пехота, превращается в Вер Кнехта
+  \u2022 Вер Кнехт (ВК) — ветеран, превращается далее
+  \u2022 Разведчик (Рк) — особый ход: взятие с разменом
 
 КАК ХОДИТЬ
 
 Перетаскивание (Drag & Drop): нажмите и удерживайте левую кнопку мыши на фигуре, перетащите на целевую клетку и отпустите. Фигура автоматически встанет по центру клетки.
 
 Подсветка:
-  • При начале хода подсвечивается стартовая клетка
-  • При перетаскивании подсвечивается клетка под курсором
-  • После хода целевая клетка слабо подсвечена
+  \u2022 При начале хода подсвечивается стартовая клетка
+  \u2022 При перетаскивании подсвечивается клетка под курсором
+  \u2022 После хода целевая клетка слабо подсвечена
 
 РЕЖИМЫ ИГРЫ
 
 1. Партия — режим игры двух игроков:
-   • Нажмите кнопку «Партия»
-   • Создайте папку для сохранения партии
-   • Играйте, соблюдая очерёдность ходов
+   \u2022 Нажмите кнопку «Партия»
+   \u2022 Создайте папку для сохранения партии
+   \u2022 Играйте, соблюдая очерёдность ходов
 
 2. Анализ — режим анализа позиций:
-   • Нажмите кнопку «Анализ»
-   • Расставьте фигуры из касс (перетаскивание)
-   • Выберите, кто ходит первым
-   • Нажмите «Готово» для начала анализа
+   \u2022 Нажмите кнопку «Анализ»
+   \u2022 Расставьте фигуры из касс (перетаскивание)
+   \u2022 Выберите, кто ходит первым
+   \u2022 Нажмите «Готово» для начала анализа
 
 ПРЕВРАЩЕНИЯ ФИГУР
 
-• Кнехт автоматически превращается в Вер Кнехта:
-  — Белый Кнехт на 6-й горизонтали → белый ВК
-  — Чёрный Кнехт на 3-й горизонтали → чёрный ВК
+\u2022 Кнехт автоматически превращается в Вер Кнехта:
+  — Белый Кнехт на 6-й горизонтали \u2192 белый ВК
+  — Чёрный Кнехт на 3-й горизонтали \u2192 чёрный ВК
 
-• Вер Кнехт превращается по выбору на крайних клетках
-• Принц превращается по выбору на центральных клетках замка
+\u2022 Вер Кнехт превращается по выбору на крайних клетках
+\u2022 Принц превращается по выбору на центральных клетках замка
 
 СПЕЦИАЛЬНЫЙ ХОД РАЗВЕДЧИКА
 
@@ -72,33 +75,42 @@ INTRO_TEXT = """Как пользоваться программой ГИ chess-
 КНОПКИ УПРАВЛЕНИЯ
 
 Верхний ряд:
-  • Начальная расстановка — сбросить фигуры в начальную позицию
-  • Партия — начать режим партии
-  • Анализ — начать режим анализа
-  • Свернуть / Поверх всех окон / Закрыть
+  \u2022 Начальная расстановка — сбросить фигуры в начальную позицию
+  \u2022 Партия — начать режим партии
+  \u2022 Анализ — начать режим анализа
+  \u2022 Свернуть / Поверх всех окон / Закрыть
 
 Нижний ряд:
-  • Меню — дополнительные команды
-  • ◀ Предыдущий ход / Следующий ход ▶
-  • Удалить фигуру
-  • Реверс — перевернуть доску
-  • Изменить размер
+  \u2022 Меню — дополнительные команды
+  \u2022 \u25c0 Предыдущий ход / Следующий ход \u25b6
+  \u2022 Удалить фигуру
+  \u2022 Реверс — перевернуть доску
+  \u2022 Изменить размер
 
 МЕНЮ
 
-  • О программе — показать эту страницу
-  • Сохранить позицию — скриншот текущей позиции
-  • Сохранить позицию как — скриншот с выбором имени
-  • Завершить партию — завершить текущий сеанс
-  • Создать ярлык — ярлык на рабочем столе
-  • Выход — закрыть программу
+  \u2022 О программе — показать эту страницу
+  \u2022 Сохранить позицию — скриншот текущей позиции
+  \u2022 Сохранить позицию как — скриншот с выбором имени
+  \u2022 Завершить партию — завершить текущий сеанс
+  \u2022 Создать ярлык — ярлык на рабочем столе
+  \u2022 Выход — закрыть программу
 
 Приятной игры!
 """
 
+# Colors matching the PDF mockup
+COLOR_FRAME_BG = "#4A90C8"       # Blue frame background
+COLOR_TEXT_BG = "#D4C9A8"        # Beige/tan text area background
+COLOR_TEXT_FG = "#1A1A1A"        # Dark text
+COLOR_BTN_MAIN = "#5DADE2"       # "Основной режим" button (cyan/blue)
+COLOR_BTN_SKIP = "#7FB3D8"       # Skip buttons
+COLOR_BTN_CTRL = "#5B9BD5"       # Window control buttons
+COLOR_BTN_CLOSE = "#C0392B"      # Close button red
+
 
 class IntroPage(tk.Toplevel):
-    """Intro/About page window."""
+    """Intro/About page window — matches PDF mockup design."""
 
     def __init__(self, parent, app, on_close=None, skip_callback=None):
         super().__init__(parent)
@@ -107,9 +119,9 @@ class IntroPage(tk.Toplevel):
         self.skip_callback = skip_callback
 
         self.title("chess-T1 — О программе")
-        self.configure(bg="#2C3E6B")
+        self.configure(bg=COLOR_FRAME_BG)
 
-        # Try to match parent window size
+        # Match parent window size (spec: width equals main view width)
         try:
             pw = parent.winfo_width()
             ph = parent.winfo_height()
@@ -124,88 +136,88 @@ class IntroPage(tk.Toplevel):
         self._build_ui()
 
     def _build_ui(self):
-        """Build intro page UI."""
-        main_frame = tk.Frame(self, bg="#2C3E6B", padx=15, pady=15)
-        main_frame.pack(fill="both", expand=True)
+        """Build intro page matching the PDF mockup."""
+        # Outer blue frame with padding
+        outer = tk.Frame(self, bg=COLOR_FRAME_BG, padx=8, pady=8)
+        outer.pack(fill="both", expand=True)
 
-        # Header with program symbol and title
-        header = tk.Frame(main_frame, bg="#2C3E6B")
-        header.pack(fill="x", pady=(0, 10))
+        # Top bar: symbol + buttons
+        top_bar = tk.Frame(outer, bg=COLOR_FRAME_BG)
+        top_bar.pack(fill="x", pady=(0, 6))
 
-        # Program symbol (decorative)
+        # Program symbol (decorative, left side) — chess piece icon
         symbol_label = tk.Label(
-            header, text="♚", font=("Arial", 36),
-            fg="#FFD700", bg="#2C3E6B"
+            top_bar, text="\u265a", font=("Arial", 28),
+            fg="#1A237E", bg=COLOR_FRAME_BG
         )
-        symbol_label.pack(side="left", padx=(10, 15))
+        symbol_label.pack(side="left", padx=(5, 10))
 
-        title_label = tk.Label(
-            header, text="chess-T1",
-            font=("Arial", 24, "bold"), fg="white", bg="#2C3E6B"
-        )
-        title_label.pack(side="left")
-
-        # Top buttons
-        btn_frame_top = tk.Frame(main_frame, bg="#2C3E6B")
-        btn_frame_top.pack(fill="x", pady=(0, 10))
-
+        # "Основной режим" button (closes intro, opens main view)
         btn_main = tk.Button(
-            btn_frame_top, text="Основной режим",
-            font=("Arial", 11), command=self._go_to_main,
-            bg="#4CAF50", fg="white", relief="raised",
-            padx=15, pady=5
+            top_bar, text="Основной\nрежим",
+            font=("Arial", 9, "bold"), command=self._go_to_main,
+            bg=COLOR_BTN_MAIN, fg="white", relief="raised",
+            padx=12, pady=4, bd=2
         )
         btn_main.pack(side="left", padx=5)
 
-        btn_skip = tk.Button(
-            btn_frame_top, text="Пропустить вводный текст",
-            font=("Arial", 10), command=self._skip,
-            bg="#607D8B", fg="white", padx=10, pady=5
-        )
-        btn_skip.pack(side="left", padx=5)
-
-        btn_skip_forever = tk.Button(
-            btn_frame_top, text="Пропустить и не показывать больше",
-            font=("Arial", 10), command=self._skip_forever,
-            bg="#795548", fg="white", padx=10, pady=5
-        )
-        btn_skip_forever.pack(side="left", padx=5)
-
-        # Window control buttons
-        ctrl_frame = tk.Frame(btn_frame_top, bg="#2C3E6B")
+        # Window control buttons (right side): Minimize, OnTop, Close
+        ctrl_frame = tk.Frame(top_bar, bg=COLOR_FRAME_BG)
         ctrl_frame.pack(side="right")
 
         btn_minimize = tk.Button(
-            ctrl_frame, text="—", font=("Arial", 12),
-            command=self._minimize, width=3, bg="#455A64", fg="white"
+            ctrl_frame, text="\u2014", font=("Arial", 11, "bold"),
+            command=self._minimize, width=3,
+            bg=COLOR_BTN_CTRL, fg="white", relief="raised", bd=1
         )
         btn_minimize.pack(side="left", padx=2)
 
         self._on_top = False
         self.btn_ontop = tk.Button(
-            ctrl_frame, text="📌", font=("Arial", 10),
-            command=self._toggle_on_top, width=3, bg="#455A64", fg="white"
+            ctrl_frame, text="\u25a0", font=("Arial", 10),
+            command=self._toggle_on_top, width=3,
+            bg=COLOR_BTN_CTRL, fg="white", relief="raised", bd=1
         )
         self.btn_ontop.pack(side="left", padx=2)
 
         btn_close = tk.Button(
-            ctrl_frame, text="✕", font=("Arial", 12),
-            command=self._close, width=3, bg="#C62828", fg="white"
+            ctrl_frame, text="\u2715", font=("Arial", 11, "bold"),
+            command=self._close, width=3,
+            bg=COLOR_BTN_CLOSE, fg="white", relief="raised", bd=1
         )
         btn_close.pack(side="left", padx=2)
 
-        # Scrollable text area
-        text_frame = tk.Frame(main_frame, bg="white", bd=2, relief="sunken")
+        # Skip buttons row
+        skip_bar = tk.Frame(outer, bg=COLOR_FRAME_BG)
+        skip_bar.pack(fill="x", pady=(0, 6))
+
+        btn_skip = tk.Button(
+            skip_bar, text="Пропустить вводный текст /\nперейти в основной режим",
+            font=("Arial", 8), command=self._skip,
+            bg=COLOR_BTN_SKIP, fg="#333", padx=8, pady=2, relief="raised", bd=1
+        )
+        btn_skip.pack(side="left", padx=5)
+
+        btn_skip_forever = tk.Button(
+            skip_bar, text="Пропустить и не\nпоказывать больше",
+            font=("Arial", 8), command=self._skip_forever,
+            bg=COLOR_BTN_SKIP, fg="#333", padx=8, pady=2, relief="raised", bd=1
+        )
+        btn_skip_forever.pack(side="left", padx=5)
+
+        # Scrollable text area (beige/tan background matching mockup)
+        text_frame = tk.Frame(outer, bg=COLOR_TEXT_BG, bd=2, relief="sunken")
         text_frame.pack(fill="both", expand=True)
 
         scrollbar = tk.Scrollbar(text_frame)
         scrollbar.pack(side="right", fill="y")
 
         self.text_widget = tk.Text(
-            text_frame, wrap="word", font=("Arial", 12),
-            bg="white", fg="#333333", padx=20, pady=15,
+            text_frame, wrap="word", font=("Arial", 11),
+            bg=COLOR_TEXT_BG, fg=COLOR_TEXT_FG, padx=20, pady=15,
             yscrollcommand=scrollbar.set, state="normal",
-            spacing1=2, spacing3=2
+            spacing1=2, spacing3=2, relief="flat",
+            selectbackground="#5DADE2", insertwidth=0
         )
         self.text_widget.pack(fill="both", expand=True)
         scrollbar.config(command=self.text_widget.yview)
@@ -213,21 +225,23 @@ class IntroPage(tk.Toplevel):
         self.text_widget.insert("1.0", INTRO_TEXT)
         self.text_widget.config(state="disabled")
 
-        # Resize grip
-        grip = tk.Label(main_frame, text="⇲", font=("Arial", 14),
-                        fg="#AAA", bg="#2C3E6B", cursor="bottom_right_corner")
-        grip.pack(side="right", anchor="se")
+        # Resize grip (bottom right corner)
+        grip_bar = tk.Frame(outer, bg=COLOR_FRAME_BG)
+        grip_bar.pack(fill="x")
+
+        grip = tk.Label(
+            grip_bar, text="\u21f2", font=("Arial", 14, "bold"),
+            fg="#2C5F8A", bg=COLOR_FRAME_BG, cursor="bottom_right_corner"
+        )
+        grip.pack(side="right", anchor="se", padx=2, pady=2)
 
     def _go_to_main(self):
-        """Close intro and go to main view."""
         self._close()
 
     def _skip(self):
-        """Skip intro without saving preference."""
         self._close()
 
     def _skip_forever(self):
-        """Skip intro and remember preference."""
         if self.skip_callback:
             self.skip_callback()
         self._close()
@@ -240,7 +254,6 @@ class IntroPage(tk.Toplevel):
         self.attributes("-topmost", self._on_top)
 
     def _close(self):
-        """Close intro page."""
         self.grab_release()
         self.destroy()
         if self.on_close_callback:

@@ -92,21 +92,22 @@ class TopToolbar(tk.Frame):
         super().__init__(parent, bg=TOOLBAR_BG, **kwargs)
         self.app = app
 
+        # Buttons match the PDF mockup "Расширенный вид ГИ"
         self.btn_initial = ToolButton(
-            self, symbol="⟳", tooltip="Начальная расстановка",
-            command=app.reset_to_initial
+            self, text="Начальная\nрасстановка", tooltip="Начальная расстановка",
+            command=app.reset_to_initial, font=BTN_FONT_SMALL
         )
         self.btn_initial.pack(side="left", padx=2, pady=4)
 
         self.btn_party = ToolButton(
             self, text="Партия", tooltip="Режим Партия",
-            command=app.start_party_mode
+            command=app.start_party_mode, bg="#2E7D32"
         )
         self.btn_party.pack(side="left", padx=2, pady=4)
 
         self.btn_analysis = ToolButton(
             self, text="Анализ", tooltip="Режим Анализ",
-            command=app.start_analysis_mode
+            command=app.start_analysis_mode, bg="#1565C0"
         )
         self.btn_analysis.pack(side="left", padx=2, pady=4)
 
@@ -114,19 +115,19 @@ class TopToolbar(tk.Frame):
         tk.Frame(self, bg=TOOLBAR_BG).pack(side="left", fill="x", expand=True)
 
         self.btn_minimize = ToolButton(
-            self, symbol="—", tooltip="Свернуть",
+            self, symbol="\u2014", tooltip="Свернуть",
             command=app.minimize_window
         )
         self.btn_minimize.pack(side="left", padx=2, pady=4)
 
         self.btn_on_top = ToolButton(
-            self, symbol="📌", tooltip="Поверх всех окон",
+            self, symbol="\u25a0", tooltip="Поверх всех окон",
             command=app.toggle_always_on_top
         )
         self.btn_on_top.pack(side="left", padx=2, pady=4)
 
         self.btn_close = ToolButton(
-            self, symbol="✕", tooltip="Закрыть программу",
+            self, symbol="\u2715", tooltip="Закрыть программу",
             command=app.close_app, bg="#C62828"
         )
         self.btn_close.pack(side="left", padx=2, pady=4)
@@ -174,8 +175,9 @@ class BottomToolbar(tk.Frame):
         super().__init__(parent, bg=TOOLBAR_BG, **kwargs)
         self.app = app
 
+        # Menu button: circle with 3 horizontal lines (hamburger icon from SVG)
         self.btn_menu = ToolButton(
-            self, text="Меню", tooltip="Открыть меню",
+            self, symbol="\u2630", tooltip="Меню",
             command=app.show_menu
         )
         self.btn_menu.pack(side="left", padx=2, pady=4)
@@ -190,25 +192,25 @@ class BottomToolbar(tk.Frame):
         self.indicator_label.pack(side="left", padx=5)
 
         self.btn_prev = ToolButton(
-            self, symbol="◀", tooltip="Предыдущий ход",
+            self, symbol="\u25c0", tooltip="Предыдущий ход",
             command=app.prev_move
         )
         self.btn_prev.pack(side="left", padx=2, pady=4)
 
         self.btn_next = ToolButton(
-            self, symbol="▶", tooltip="Следующий ход",
+            self, symbol="\u25b6", tooltip="Следующий ход",
             command=app.next_move
         )
         self.btn_next.pack(side="left", padx=2, pady=4)
 
         self.btn_delete = ToolButton(
-            self, symbol="🗑", tooltip="Удалить фигуру",
+            self, symbol="\u2716", tooltip="Удалить фигуру",
             command=app.delete_piece_mode
         )
         self.btn_delete.pack(side="left", padx=2, pady=4)
 
         self.btn_reverse = ToolButton(
-            self, symbol="↕", tooltip="Реверс (перевернуть доску)",
+            self, symbol="\u21c5", tooltip="Реверс (перевернуть доску)",
             command=app.reverse_board
         )
         self.btn_reverse.pack(side="left", padx=2, pady=4)
@@ -216,17 +218,20 @@ class BottomToolbar(tk.Frame):
         # Analysis-specific buttons (hidden by default)
         self.btn_reset = ToolButton(
             self, text="Сброс", tooltip="Очистить поле",
-            command=app.analysis_reset
+            command=app.analysis_reset, font=BTN_FONT_SMALL
         )
 
+        # "1-й ход" button: shows white/black rectangles with indicator (from SVG mockup)
         self.btn_first_move = ToolButton(
             self, text="1-й ход", tooltip="Выбор очерёдности первого хода",
-            command=app.analysis_toggle_first_move
+            command=app.analysis_toggle_first_move, font=BTN_FONT_SMALL
         )
 
+        # "Ok" button: matches SVG circle with "Ok" text
         self.btn_ok = ToolButton(
-            self, text="Готово", tooltip="Зафиксировать позицию",
-            command=app.analysis_confirm, bg="#4CAF50"
+            self, text="Ok", tooltip="Зафиксировать позицию",
+            command=app.analysis_confirm, bg="#4A90C8",
+            font=("Arial", 11, "bold")
         )
 
         # Spacer
