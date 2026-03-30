@@ -5,6 +5,7 @@ Game board widget for chess-T1.
 
 import tkinter as tk
 import os
+import sys
 import math
 from pieces import (
     Piece, WHITE, BLACK, RAZVEDCHIK,
@@ -83,7 +84,12 @@ class GameBoard(tk.Canvas):
     def load_piece_images(self):
         """Load and scale piece images."""
         self.piece_images.clear()
-        icon_dir = os.path.join(os.path.dirname(__file__), "icons")
+        # Support both normal run and PyInstaller frozen bundle
+        if getattr(sys, 'frozen', False):
+            base_dir = sys._MEIPASS
+        else:
+            base_dir = os.path.dirname(os.path.abspath(__file__))
+        icon_dir = os.path.join(base_dir, "icons")
         icon_height = int(self.cell_size * 0.9)  # 10:9 ratio
 
         for (color, ptype), filename in ICON_FILES.items():
@@ -145,24 +151,30 @@ class GameBoard(tk.Canvas):
         return base64.b64encode(buf.getvalue())
 
     def _create_text_icon(self, color, ptype, icon_height):
-        """Create a simple text-based icon as fallback."""
-        from pieces import PIECE_SHORT_NAMES
+        """Create a simple circle icon as fallback using row-based put for speed."""
         size = max(icon_height, 30)
         img = tk.PhotoImage(width=size, height=size)
 
         fill_color = "#FFFFFF" if color == WHITE else "#333333"
         outline_color = "#333333" if color == WHITE else "#FFFFFF"
+        transparent = ""
+        r = size // 2 - 2
+        cx, cy = size // 2, size // 2
 
-        # Fill background
+        # Build image row by row (much faster than pixel by pixel)
         for y in range(size):
+            row = []
             for x in range(size):
-                dx = x - size // 2
-                dy = y - size // 2
-                r = size // 2 - 2
-                if dx * dx + dy * dy <= r * r:
-                    img.put(fill_color, (x, y))
-                elif dx * dx + dy * dy <= (r + 2) * (r + 2):
-                    img.put(outline_color, (x, y))
+                dx = x - cx
+                dy = y - cy
+                dist_sq = dx * dx + dy * dy
+                if dist_sq <= r * r:
+                    row.append(fill_color)
+                elif dist_sq <= (r + 2) * (r + 2):
+                    row.append(outline_color)
+                else:
+                    row.append(transparent)
+            img.put("{" + " ".join(row) + "}", to=(0, y))
 
         self.piece_images[(color, ptype)] = img
 

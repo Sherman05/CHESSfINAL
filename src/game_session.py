@@ -5,11 +5,23 @@ Handles saving/restoring sessions and position screenshots.
 
 import json
 import os
+import sys
 import time
 from pieces import Piece, copy_position, WHITE, BLACK
 
 
-CONFIG_DIR = os.path.join(os.path.expanduser("~"), ".chesst1")
+def _get_appdata_dir():
+    """Get OS-appropriate application data directory."""
+    if sys.platform == "win32":
+        # Windows: use %APPDATA%\chesst1
+        appdata = os.environ.get("APPDATA")
+        if appdata:
+            return os.path.join(appdata, "chesst1")
+        return os.path.join(os.path.expanduser("~"), "AppData", "Roaming", "chesst1")
+    return os.path.join(os.path.expanduser("~"), ".chesst1")
+
+
+CONFIG_DIR = _get_appdata_dir()
 CONFIG_FILE = os.path.join(CONFIG_DIR, "config.json")
 SESSION_FILE = os.path.join(CONFIG_DIR, "session.json")
 
@@ -96,12 +108,22 @@ def clear_session():
 def get_screenshot_name(move_number, white_turn):
     """Generate screenshot filename based on move indicator.
     White turn: '1. __ хб'
-    Black turn: '8 … __ хч'
+    Black turn: '8 ... __ хч'
+    Note: Windows forbids characters like … in filenames, using '...' instead.
+    Also dots before space can be problematic, using underscore separator.
     """
     if white_turn:
-        return f"{move_number}. __ хб.png"
+        return f"{move_number}_хб.png"
     else:
-        return f"{move_number} … __ хч.png"
+        return f"{move_number}_хч.png"
+
+
+def get_indicator_text(move_number, white_turn):
+    """Get display text for the move indicator (used in UI)."""
+    if white_turn:
+        return f"{move_number}. __ хб"
+    else:
+        return f"{move_number} \u2026 __ хч"
 
 
 def get_screenshot_dir(party_folder):
@@ -109,21 +131,39 @@ def get_screenshot_dir(party_folder):
     if party_folder and os.path.isdir(party_folder):
         return party_folder
 
-    # Fallback: Pictures directory
-    pictures = os.path.join(os.path.expanduser("~"), "Pictures")
-    if not os.path.exists(pictures):
-        pictures = os.path.join(os.path.expanduser("~"), "Изображения")
-    if not os.path.exists(pictures):
-        pictures = os.path.expanduser("~")
-    return pictures
+    # Windows: use Pictures folder
+    if sys.platform == "win32":
+        # Try known shell folder
+        try:
+            import winreg
+            key = winreg.OpenKey(
+                winreg.HKEY_CURRENT_USER,
+                r"Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders"
+            )
+            pictures, _ = winreg.QueryValueEx(key, "My Pictures")
+            winreg.CloseKey(key)
+            if os.path.isdir(pictures):
+                return pictures
+        except Exception:
+            pass
+
+    # Cross-platform fallbacks
+    for name in ("Pictures", "Изображения"):
+        pictures = os.path.join(os.path.expanduser("~"), name)
+        if os.path.exists(pictures):
+            return pictures
+
+    return os.path.expanduser("~")
 
 
 def save_screenshot(widget, filepath):
     """Save a widget screenshot as PNG.
-    Uses PostScript export and conversion, or direct grab.
+    Uses Pillow ImageGrab on Windows, PostScript fallback on other OS.
     """
+    # Ensure target directory exists
+    os.makedirs(os.path.dirname(filepath), exist_ok=True)
+
     try:
-        # Try using Pillow's ImageGrab
         from PIL import ImageGrab
 
         x = widget.winfo_rootx()
@@ -134,25 +174,32 @@ def save_screenshot(widget, filepath):
         image = ImageGrab.grab(bbox=(x, y, x + w, y + h))
         image.save(filepath, "PNG")
         return True
-    except ImportError:
+    except (ImportError, OSError):
         pass
 
     try:
-        # Fallback: PostScript -> PNG via Pillow
-        import tempfile
+        # Fallback: Canvas PostScript -> PNG via Pillow
         from PIL import Image
+        import tempfile
 
-        ps_path = filepath + ".ps"
-        widget.postscript(file=ps_path, colormode="color")
-        img = Image.open(ps_path)
-        img.save(filepath, "PNG")
-        os.remove(ps_path)
-        return True
+        with tempfile.NamedTemporaryFile(suffix=".ps", delete=False) as tmp:
+            ps_path = tmp.name
+
+        try:
+            widget.postscript(file=ps_path, colormode="color")
+            img = Image.open(ps_path)
+            img.save(filepath, "PNG")
+            return True
+        finally:
+            try:
+                os.remove(ps_path)
+            except OSError:
+                pass
     except Exception:
         pass
 
     try:
-        # Last resort: save PostScript
+        # Last resort: raw PostScript
         ps_path = filepath.replace(".png", ".ps")
         widget.postscript(file=ps_path, colormode="color")
         return True

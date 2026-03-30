@@ -24,8 +24,67 @@ from dialogs import (
 from game_session import (
     load_config, save_config, save_session, load_session,
     clear_session, get_screenshot_name, get_screenshot_dir,
-    save_screenshot
+    save_screenshot, get_indicator_text
 )
+
+
+def _get_base_dir():
+    """Get the base directory of the application.
+    Handles both normal Python execution and PyInstaller frozen bundle.
+    """
+    if getattr(sys, 'frozen', False):
+        # Running as PyInstaller bundle
+        return sys._MEIPASS
+    return os.path.dirname(os.path.abspath(__file__))
+
+
+def _get_executable_path():
+    """Get path to the executable/script for shortcuts."""
+    if getattr(sys, 'frozen', False):
+        return sys.executable
+    return os.path.abspath(__file__)
+
+
+def _get_desktop_path():
+    """Get the user's Desktop path cross-platform."""
+    if sys.platform == "win32":
+        try:
+            import winreg
+            key = winreg.OpenKey(
+                winreg.HKEY_CURRENT_USER,
+                r"Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders"
+            )
+            desktop, _ = winreg.QueryValueEx(key, "Desktop")
+            winreg.CloseKey(key)
+            if os.path.isdir(desktop):
+                return desktop
+        except Exception:
+            pass
+    desktop = os.path.join(os.path.expanduser("~"), "Desktop")
+    if os.path.isdir(desktop):
+        return desktop
+    return os.path.expanduser("~")
+
+
+def _create_windows_shortcut(shortcut_path, target_path):
+    """Create a Windows .lnk shortcut using COM."""
+    try:
+        # Try pythoncom/win32com (PyWin32)
+        from win32com.client import Dispatch
+        shell = Dispatch("WScript.Shell")
+        shortcut = shell.CreateShortCut(shortcut_path)
+        shortcut.Targetpath = target_path
+        shortcut.WorkingDirectory = os.path.dirname(target_path)
+        shortcut.Description = "chess-T1"
+        shortcut.save()
+    except ImportError:
+        # Fallback: create a .bat launcher if COM not available
+        bat_path = shortcut_path.replace(".lnk", ".bat")
+        with open(bat_path, "w", encoding="cp1251") as f:
+            if getattr(sys, 'frozen', False):
+                f.write(f'@echo off\nstart "" "{target_path}"\n')
+            else:
+                f.write(f'@echo off\npython "{target_path}"\n')
 
 
 class ChessT1App:
@@ -123,10 +182,7 @@ class ChessT1App:
             self.bottom_toolbar.set_indicator("")
             return
 
-        if self.white_turn:
-            text = f"{self.move_number}. __ хб"
-        else:
-            text = f"{self.move_number} … __ хч"
+        text = get_indicator_text(self.move_number, self.white_turn)
         self.bottom_toolbar.set_indicator(text)
 
     def _enter_startup(self):
@@ -545,19 +601,17 @@ class ChessT1App:
         self._enter_startup()
 
     def create_shortcut(self):
-        """Create desktop shortcut."""
-        desktop = os.path.join(os.path.expanduser("~"), "Desktop")
-        if not os.path.exists(desktop):
-            desktop = os.path.expanduser("~")
+        """Create desktop shortcut (section 10.1)."""
+        desktop = _get_desktop_path()
 
         if sys.platform == "win32":
-            shortcut_path = os.path.join(desktop, "chess-T1.bat")
+            shortcut_path = os.path.join(desktop, "chess-T1.lnk")
             if os.path.exists(shortcut_path):
                 messagebox.showinfo("Ярлык", "Ярлык уже существует.", parent=self.root)
                 return
             try:
-                with open(shortcut_path, "w") as f:
-                    f.write(f'@echo off\npython "{os.path.abspath(__file__)}"\n')
+                exe_path = _get_executable_path()
+                _create_windows_shortcut(shortcut_path, exe_path)
                 messagebox.showinfo("Ярлык", "Ярлык создан на рабочем столе.", parent=self.root)
             except Exception as e:
                 messagebox.showerror("Ошибка", f"Не удалось создать ярлык:\n{e}", parent=self.root)
@@ -567,9 +621,10 @@ class ChessT1App:
                 messagebox.showinfo("Ярлык", "Ярлык уже существует.", parent=self.root)
                 return
             try:
+                exe_path = _get_executable_path()
                 with open(shortcut_path, "w") as f:
                     f.write(f"[Desktop Entry]\nType=Application\nName=chess-T1\n"
-                            f"Exec=python3 {os.path.abspath(__file__)}\nTerminal=false\n"
+                            f"Exec=python3 {exe_path}\nTerminal=false\n"
                             f"Categories=Game;\n")
                 os.chmod(shortcut_path, 0o755)
                 messagebox.showinfo("Ярлык", "Ярлык создан на рабочем столе.", parent=self.root)

@@ -5,6 +5,28 @@ Dialog windows for chess-T1.
 import tkinter as tk
 from tkinter import filedialog, messagebox
 import os
+import sys
+
+
+def _get_desktop_path():
+    """Get user's Desktop path, Windows-aware."""
+    if sys.platform == "win32":
+        try:
+            import winreg
+            key = winreg.OpenKey(
+                winreg.HKEY_CURRENT_USER,
+                r"Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders"
+            )
+            desktop, _ = winreg.QueryValueEx(key, "Desktop")
+            winreg.CloseKey(key)
+            if os.path.isdir(desktop):
+                return desktop
+        except Exception:
+            pass
+    desktop = os.path.join(os.path.expanduser("~"), "Desktop")
+    if not os.path.isdir(desktop):
+        desktop = os.path.expanduser("~")
+    return desktop
 
 
 class CreateFolderDialog(tk.Toplevel):
@@ -43,10 +65,7 @@ class CreateFolderDialog(tk.Toplevel):
         tk.Label(loc_frame, text="Расположение:", font=("Arial", 10),
                  bg="#F5F5F5").pack(side="left")
 
-        # Default: Desktop or home
-        desktop = os.path.join(os.path.expanduser("~"), "Desktop")
-        if not os.path.exists(desktop):
-            desktop = os.path.expanduser("~")
+        desktop = _get_desktop_path()
 
         self.location_var = tk.StringVar(value=desktop)
         self.loc_entry = tk.Entry(loc_frame, textvariable=self.location_var,
@@ -139,7 +158,6 @@ class PromotionDialog(tk.Toplevel):
         icons_frame = tk.Frame(frame, bg="#2C3E6B")
         icons_frame.pack()
 
-        icon_size = int(cell_size * 0.8)
         from pieces import PIECE_SHORT_NAMES
 
         for ptype in options:
