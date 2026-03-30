@@ -1,9 +1,12 @@
 """
 Toolbar buttons for chess-T1.
 Top row and bottom row of control buttons.
+Button icons loaded from SVG files extracted from customer's design.
 """
 
 import tkinter as tk
+import os
+import sys
 
 
 # Button style constants
@@ -15,30 +18,114 @@ BTN_HIGHLIGHT_BG = "#1B5E20"
 BTN_FONT = ("Arial", 10)
 BTN_FONT_SMALL = ("Arial", 9)
 TOOLBAR_BG = "#263238"
+ICON_SIZE = 28  # Button icon size in pixels
+
+
+def _get_icons_dir():
+    """Get path to button icons directory."""
+    if getattr(sys, 'frozen', False):
+        base = sys._MEIPASS
+    else:
+        base = os.path.dirname(os.path.abspath(__file__))
+    return os.path.join(base, "icons", "buttons")
+
+
+def _load_button_icon(name, size=ICON_SIZE):
+    """Load an SVG button icon and return as PhotoImage.
+    Falls back to None if loading fails.
+    """
+    icon_dir = _get_icons_dir()
+    filepath = os.path.join(icon_dir, f"{name}.svg")
+    if not os.path.exists(filepath):
+        return None
+    try:
+        import cairosvg
+        from PIL import Image
+        import io
+        import base64
+
+        png_data = cairosvg.svg2png(url=filepath, output_height=size, output_width=size)
+        image = Image.open(io.BytesIO(png_data))
+        buf = io.BytesIO()
+        image.save(buf, format='PNG')
+        return tk.PhotoImage(data=base64.b64encode(buf.getvalue()))
+    except ImportError:
+        pass
+    try:
+        import subprocess
+        import tempfile
+        import base64
+
+        with tempfile.NamedTemporaryFile(suffix='.png', delete=False) as tmp:
+            tmp_path = tmp.name
+        try:
+            subprocess.run(
+                ['rsvg-convert', '-w', str(size), '-h', str(size), filepath, '-o', tmp_path],
+                capture_output=True, check=True
+            )
+            from PIL import Image
+            import io
+            image = Image.open(tmp_path)
+            buf = io.BytesIO()
+            image.save(buf, format='PNG')
+            return tk.PhotoImage(data=base64.b64encode(buf.getvalue()))
+        except (subprocess.CalledProcessError, FileNotFoundError, ImportError):
+            pass
+        finally:
+            if os.path.exists(tmp_path):
+                os.unlink(tmp_path)
+    except Exception:
+        pass
+    return None
 
 
 class ToolButton(tk.Button):
-    """Custom styled button with tooltip and freeze/highlight support."""
+    """Custom styled button with tooltip, icon support, and freeze/highlight."""
 
-    def __init__(self, parent, text="", symbol="", tooltip="",
-                 command=None, **kwargs):
+    def __init__(self, parent, text="", symbol="", icon_name="",
+                 tooltip="", command=None, **kwargs):
         self._tooltip_text = tooltip
         self._frozen = False
         self._highlighted = False
         self._original_bg = kwargs.pop("bg", BTN_BG)
         self._original_fg = kwargs.pop("fg", BTN_FG)
+        self._icon_image = None  # prevent GC
 
         display_text = symbol if symbol else text
-        super().__init__(
-            parent, text=display_text, command=command,
-            font=kwargs.pop("font", BTN_FONT),
-            bg=self._original_bg, fg=self._original_fg,
-            activebackground=BTN_ACTIVE_BG,
-            activeforeground="white",
-            relief="flat", bd=1, padx=8, pady=4,
-            cursor="hand2",
-            **kwargs
-        )
+        font = kwargs.pop("font", BTN_FONT)
+
+        # Try to load SVG icon from design files
+        if icon_name:
+            img = _load_button_icon(icon_name)
+            if img:
+                self._icon_image = img
+                super().__init__(
+                    parent, image=img, command=command,
+                    bg=self._original_bg,
+                    activebackground=BTN_ACTIVE_BG,
+                    relief="flat", bd=1, padx=4, pady=4,
+                    cursor="hand2",
+                    **kwargs
+                )
+            else:
+                # Fallback to text/symbol
+                super().__init__(
+                    parent, text=display_text, command=command,
+                    font=font, bg=self._original_bg, fg=self._original_fg,
+                    activebackground=BTN_ACTIVE_BG, activeforeground="white",
+                    relief="flat", bd=1, padx=8, pady=4,
+                    cursor="hand2",
+                    **kwargs
+                )
+        else:
+            super().__init__(
+                parent, text=display_text, command=command,
+                font=font, bg=self._original_bg, fg=self._original_fg,
+                activebackground=BTN_ACTIVE_BG, activeforeground="white",
+                relief="flat", bd=1, padx=8, pady=4,
+                cursor="hand2",
+                **kwargs
+            )
 
         self._tooltip_window = None
         self.bind("<Enter>", self._show_tooltip)
@@ -92,9 +179,10 @@ class TopToolbar(tk.Frame):
         super().__init__(parent, bg=TOOLBAR_BG, **kwargs)
         self.app = app
 
-        # Buttons match the PDF mockup "Расширенный вид ГИ"
+        # Buttons with SVG icons from customer's design files
         self.btn_initial = ToolButton(
-            self, text="Начальная\nрасстановка", tooltip="Начальная расстановка",
+            self, text="Начальная\nрасстановка", icon_name="btn_initial",
+            tooltip="Начальная расстановка",
             command=app.reset_to_initial, font=BTN_FONT_SMALL
         )
         self.btn_initial.pack(side="left", padx=2, pady=4)
@@ -115,19 +203,20 @@ class TopToolbar(tk.Frame):
         tk.Frame(self, bg=TOOLBAR_BG).pack(side="left", fill="x", expand=True)
 
         self.btn_minimize = ToolButton(
-            self, symbol="\u2014", tooltip="Свернуть",
-            command=app.minimize_window
+            self, symbol="\u2014", icon_name="btn_minimize",
+            tooltip="Свернуть", command=app.minimize_window
         )
         self.btn_minimize.pack(side="left", padx=2, pady=4)
 
         self.btn_on_top = ToolButton(
-            self, symbol="\u25a0", tooltip="Поверх всех окон",
-            command=app.toggle_always_on_top
+            self, symbol="\u25a0", icon_name="btn_ontop",
+            tooltip="Поверх всех окон", command=app.toggle_always_on_top
         )
         self.btn_on_top.pack(side="left", padx=2, pady=4)
 
         self.btn_close = ToolButton(
-            self, symbol="\u2715", tooltip="Закрыть программу",
+            self, symbol="\u2715", icon_name="btn_close",
+            tooltip="Закрыть программу",
             command=app.close_app, bg="#C62828"
         )
         self.btn_close.pack(side="left", padx=2, pady=4)
@@ -175,10 +264,10 @@ class BottomToolbar(tk.Frame):
         super().__init__(parent, bg=TOOLBAR_BG, **kwargs)
         self.app = app
 
-        # Menu button: circle with 3 horizontal lines (hamburger icon from SVG)
+        # Menu: circle with 3 horizontal lines (from SVG design)
         self.btn_menu = ToolButton(
-            self, symbol="\u2630", tooltip="Меню",
-            command=app.show_menu
+            self, symbol="\u2630", icon_name="btn_menu",
+            tooltip="Меню", command=app.show_menu
         )
         self.btn_menu.pack(side="left", padx=2, pady=4)
 
@@ -192,26 +281,26 @@ class BottomToolbar(tk.Frame):
         self.indicator_label.pack(side="left", padx=5)
 
         self.btn_prev = ToolButton(
-            self, symbol="\u25c0", tooltip="Предыдущий ход",
-            command=app.prev_move
+            self, symbol="\u25c0", icon_name="btn_prev",
+            tooltip="Предыдущий ход", command=app.prev_move
         )
         self.btn_prev.pack(side="left", padx=2, pady=4)
 
         self.btn_next = ToolButton(
-            self, symbol="\u25b6", tooltip="Следующий ход",
-            command=app.next_move
+            self, symbol="\u25b6", icon_name="btn_next",
+            tooltip="Следующий ход", command=app.next_move
         )
         self.btn_next.pack(side="left", padx=2, pady=4)
 
         self.btn_delete = ToolButton(
-            self, symbol="\u2716", tooltip="Удалить фигуру",
-            command=app.delete_piece_mode
+            self, symbol="\u2716", icon_name="btn_delete",
+            tooltip="Удалить фигуру", command=app.delete_piece_mode
         )
         self.btn_delete.pack(side="left", padx=2, pady=4)
 
         self.btn_reverse = ToolButton(
-            self, symbol="\u21c5", tooltip="Реверс (перевернуть доску)",
-            command=app.reverse_board
+            self, symbol="\u21c5", icon_name="btn_reverse",
+            tooltip="Реверс (перевернуть доску)", command=app.reverse_board
         )
         self.btn_reverse.pack(side="left", padx=2, pady=4)
 
@@ -221,15 +310,19 @@ class BottomToolbar(tk.Frame):
             command=app.analysis_reset, font=BTN_FONT_SMALL
         )
 
-        # "1-й ход" button: shows white/black rectangles with indicator (from SVG mockup)
+        # "1-й ход": SVG icons for white/black selected states
+        self._first_move_white_img = _load_button_icon("btn_first_move_white", 32)
+        self._first_move_black_img = _load_button_icon("btn_first_move_black", 32)
         self.btn_first_move = ToolButton(
-            self, text="1-й ход", tooltip="Выбор очерёдности первого хода",
-            command=app.analysis_toggle_first_move, font=BTN_FONT_SMALL
+            self, text="1-й ход", icon_name="btn_first_move_white",
+            tooltip="Выбор очерёдности первого хода",
+            command=app.analysis_toggle_first_move
         )
 
-        # "Ok" button: matches SVG circle with "Ok" text
+        # Ok: SVG circle with "Ok" text
         self.btn_ok = ToolButton(
-            self, text="Ok", tooltip="Зафиксировать позицию",
+            self, text="Ok", icon_name="btn_ok",
+            tooltip="Зафиксировать позицию",
             command=app.analysis_confirm, bg="#4A90C8",
             font=("Arial", 11, "bold")
         )

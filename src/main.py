@@ -341,20 +341,24 @@ class ChessT1App:
         self._update_first_move_button()
 
     def _update_first_move_button(self):
-        """Update the first move button: white/black rectangles with indicator dot.
+        """Update the first move button with SVG icon or text fallback.
         Spec 9.1: два прямоугольника — белый и чёрный, выбор индицируется кружком.
-        Using Unicode blocks and circles to approximate the SVG mockup.
         """
+        btn = self.bottom_toolbar.btn_first_move
         if self.analysis_first_white:
-            # White selected: ● on white side
-            self.bottom_toolbar.btn_first_move.config(
-                text="\u25cf\u2588  \u2591", bg="#DDDDDD", fg="#222"
-            )
+            img = self.bottom_toolbar._first_move_white_img
+            if img:
+                btn.config(image=img, bg="#DDDDDD")
+                btn._icon_image = img
+            else:
+                btn.config(text="\u25cf\u2588  \u2591", bg="#DDDDDD", fg="#222")
         else:
-            # Black selected: ● on black side
-            self.bottom_toolbar.btn_first_move.config(
-                text="\u2591  \u2588\u25cf", bg="#444444", fg="white"
-            )
+            img = self.bottom_toolbar._first_move_black_img
+            if img:
+                btn.config(image=img, bg="#444444")
+                btn._icon_image = img
+            else:
+                btn.config(text="\u2591  \u2588\u25cf", bg="#444444", fg="white")
 
     def analysis_confirm(self):
         """Confirm position setup and enter game stage."""
