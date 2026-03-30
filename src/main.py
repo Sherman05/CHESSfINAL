@@ -434,15 +434,16 @@ class ChessT1App:
             self.move_number = (idx // 2) + 1
 
     def delete_piece_mode(self):
-        """Enter piece deletion mode."""
+        """Piece deletion: two-step flow per spec 6.2.
+        Step 1: Click button -> enter deletion mode (next board click selects piece)
+        Step 2: Click button again -> delete the selected piece
+        """
         if self.board.selected_for_deletion:
+            # Step 2: piece already selected, delete it
             self.board.delete_selected_piece()
         else:
-            messagebox.showinfo(
-                "Удаление фигуры",
-                "Нажмите на фигуру, которую хотите удалить,\nзатем нажмите эту кнопку снова.",
-                parent=self.root
-            )
+            # Step 1: enter deletion mode
+            self.board.enter_deletion_mode()
 
     # ---- Move Handling ----
 
@@ -458,10 +459,9 @@ class ChessT1App:
         self.move_history.append(self.board.get_position())
         self.history_index = len(self.move_history) - 1
 
-        self.white_turn = not self.white_turn
-        if self.white_turn:
-            self.move_number += 1
-
+        # Use unified logic for turn/move_number calculation
+        # This correctly handles both white-first and black-first analysis
+        self._recalculate_turn_from_history()
         self._update_indicator()
         self._auto_save_session()
 

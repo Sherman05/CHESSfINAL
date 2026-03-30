@@ -393,6 +393,7 @@ class SaveAsDialog(tk.Toplevel):
         self.transient(parent)
         self.grab_set()
         self.configure(bg="#F5F5F5")
+        self.protocol("WM_DELETE_WINDOW", self._cancel)
 
         frame = tk.Frame(self, bg="#F5F5F5", padx=20, pady=20)
         frame.pack(fill="both", expand=True)

@@ -277,11 +277,12 @@ class BottomToolbar(tk.Frame):
         # Show analysis buttons only in setup_position stage
         self.show_analysis_buttons(stage == "setup_position")
 
-        # Move indicator: only in game stage
+        # Move indicator: only visible in game stage
         if stage == "game":
             self.indicator_label.pack(side="left", padx=5, after=self.btn_menu)
         else:
             self.indicator_var.set("")
+            self.indicator_label.pack_forget()
 
     def set_indicator(self, text):
         """Set the move indicator text."""

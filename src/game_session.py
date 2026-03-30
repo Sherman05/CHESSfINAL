@@ -202,10 +202,5 @@ def save_screenshot(widget, filepath):
     except Exception:
         pass
 
-    try:
-        # Last resort: raw PostScript
-        ps_path = filepath.replace(".png", ".ps")
-        widget.postscript(file=ps_path, colormode="color")
-        return True
-    except Exception:
-        return False
+    # All PNG methods failed
+    return False

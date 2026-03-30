@@ -57,6 +57,7 @@ class GameBoard(tk.Canvas):
 
         # Piece deletion mode
         self.selected_for_deletion = None
+        self.deletion_mode = False
 
         self.bind("<Configure>", self._on_resize)
         self.bind("<Button-1>", self._on_click)
@@ -327,9 +328,23 @@ class GameBoard(tk.Canvas):
         """Handle mouse click on board."""
         cell = self.pixel_to_cell(event.x, event.y)
 
-        # Handle piece deletion selection
+        # Block all interaction in startup mode (display only)
+        if self.app.stage == "startup":
+            return
+
+        # Handle piece deletion: click on a piece to SELECT it for deletion
+        if self.deletion_mode:
+            if cell and cell in self.position:
+                self.select_piece_for_deletion(cell)
+            else:
+                # Click on empty cell — deselect
+                self.selected_for_deletion = None
+                self.deletion_mode = False
+                self.redraw()
+            return
+
+        # Handle already-selected piece for deletion (clicking elsewhere deselects)
         if self.selected_for_deletion is not None:
-            # Already selected, clicking elsewhere deselects
             self.selected_for_deletion = None
             self.redraw()
             return
@@ -339,8 +354,8 @@ class GameBoard(tk.Canvas):
 
         piece = self.position[cell]
 
-        # In game mode, check turn
-        if self.app.mode in ("party", "analysis") and self.app.stage == "game":
+        # In game mode, check turn (not in setup_position — free movement)
+        if self.app.stage == "game":
             expected_color = WHITE if self.app.white_turn else BLACK
             if piece.color != expected_color:
                 return
@@ -371,7 +386,7 @@ class GameBoard(tk.Canvas):
             self.drag_image_id = self.create_image(
                 event.x + self.drag_offset_x,
                 event.y + self.drag_offset_y,
-                image=self.piece_images[key], anchor="center"
+                image=self.piece_images[key], anchor="s"
             )
         else:
             from pieces import PIECE_SHORT_NAMES
@@ -509,9 +524,15 @@ class GameBoard(tk.Canvas):
         self.redraw()
         self.app.on_move_made(from_cell, target_cell)
 
+    def enter_deletion_mode(self):
+        """Enter deletion mode — next click on a piece selects it."""
+        self.deletion_mode = True
+        self.selected_for_deletion = None
+
     def select_piece_for_deletion(self, cell):
         """Highlight a piece for deletion."""
         self.selected_for_deletion = cell
+        self.deletion_mode = False
         self.redraw()
         if cell:
             self.highlight_cell(cell, "#FF6666")
@@ -521,6 +542,7 @@ class GameBoard(tk.Canvas):
         if self.selected_for_deletion and self.selected_for_deletion in self.position:
             del self.position[self.selected_for_deletion]
             self.selected_for_deletion = None
+            self.deletion_mode = False
             self.redraw()
             return True
         return False
