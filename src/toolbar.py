@@ -139,24 +139,27 @@ class TopToolbar(tk.Frame):
         else:
             self.btn_initial.unfreeze()
 
-        # Party button
-        self.btn_party.highlight(mode == "party")
-        if mode == "party" or (mode == "analysis" and stage == "setup_position"):
+        # Party button (sec 8.2):
+        # In party mode: frozen + highlighted
+        # In analysis setup: frozen
+        # In analysis game: active (ends session on click)
+        # In startup: active
+        self.btn_party.highlight(False)
+        if mode == "party":
             self.btn_party.freeze()
-            if mode == "party":
-                self.btn_party.highlight(True)
-                self.btn_party.config(bg=BTN_HIGHLIGHT_BG)
+            self.btn_party.highlight(True)
+            self.btn_party.config(bg=BTN_HIGHLIGHT_BG)
+        elif mode == "analysis" and stage == "setup_position":
+            self.btn_party.freeze()
         else:
             self.btn_party.unfreeze()
 
-        # Analysis button
-        self.btn_analysis.highlight(mode == "analysis")
-        if mode == "analysis" and stage != "game":
-            if stage == "setup_position":
-                self.btn_analysis.freeze()
-                self.btn_analysis.highlight(True)
-                self.btn_analysis.config(bg=BTN_HIGHLIGHT_BG)
-        elif mode == "analysis":
+        # Analysis button (sec 8.3):
+        # In analysis mode (any stage): frozen + highlighted
+        # In party mode: active (ends session on click)
+        # In startup: active
+        self.btn_analysis.highlight(False)
+        if mode == "analysis":
             self.btn_analysis.freeze()
             self.btn_analysis.highlight(True)
             self.btn_analysis.config(bg=BTN_HIGHLIGHT_BG)

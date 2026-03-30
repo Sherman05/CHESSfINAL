@@ -237,7 +237,8 @@ class ChessT1App:
         CreateFolderDialog(
             self.root,
             on_created=self._on_party_folder_created,
-            on_cancel=None
+            on_cancel=lambda: self._on_party_folder_created(None)
+            # Spec 8.1: game starts even if folder dialog cancelled
         )
 
     def _on_party_folder_created(self, folder_path):
@@ -368,8 +369,16 @@ class ChessT1App:
     # ---- Board Actions ----
 
     def reset_to_initial(self):
-        """Reset to initial position (section 6.1)."""
+        """Reset to initial position (section 6.1).
+        In Analysis setup: sets initial position but STAYS in setup (sec 9.1).
+        In Party/Analysis game: ends session, goes to startup.
+        """
         if self.stage == "startup":
+            return
+
+        # Analysis setup: place initial position, stay in extended view
+        if self.mode == "analysis" and self.stage == "setup_position":
+            self.board.set_position(get_initial_position())
             return
 
         if self.session_active:
@@ -511,14 +520,21 @@ class ChessT1App:
         menu.add_separator()
         menu.add_command(label="Выход", command=self.close_app)
 
-        # Position menu to the LEFT beyond window edge (spec 10.1)
-        btn = self.bottom_toolbar.btn_menu
+        # Position menu: right edge at board's left notation column (spec 10.1)
+        # "раскрывается влево за пределы окна ГИ. Правый край — впритык к колонке цифр"
         menu.update_idletasks()
         menu_width = menu.winfo_reqwidth()
-        x = btn.winfo_rootx() - menu_width
-        y = btn.winfo_rooty() - menu.winfo_reqheight()
+        menu_height = menu.winfo_reqheight()
+
+        # Right edge of menu = left edge of board notation (board_x)
+        board_screen_x = self.board.winfo_rootx() + self.board.board_x
+        x = board_screen_x - menu_width
         if x < 0:
             x = 0
+
+        # Vertical: open upward from bottom toolbar
+        btn = self.bottom_toolbar.btn_menu
+        y = btn.winfo_rooty() - menu_height
         if y < 0:
             y = btn.winfo_rooty() + btn.winfo_height()
         try:
