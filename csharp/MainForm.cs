@@ -80,8 +80,25 @@ namespace ChessT1
             BuildUI();
             WireEvents();
 
-            // Enter startup state
-            EnterStartup();
+            // Check for saved session (spec 10.4)
+            if (_session.LoadSession())
+            {
+                RestoreFromSession();
+            }
+            else
+            {
+                Dictionary<string, object> config = GameSession.LoadConfig();
+                bool skipIntro = config.ContainsKey("skip_intro") && (bool)config["skip_intro"];
+                if (!skipIntro)
+                {
+                    EnterStartup();
+                    this.Shown += delegate { ShowIntroPage(); };
+                }
+                else
+                {
+                    EnterStartup();
+                }
+            }
         }
 
         private void InitializeFormProperties()
@@ -96,6 +113,7 @@ namespace ChessT1
 
         private void InitializeState()
         {
+            _session = new GameSession();
             _mode = null;
             _stage = "startup";
             _sessionActive = false;
@@ -328,6 +346,8 @@ namespace ChessT1
 
             this.FormClosing += delegate(object sender, FormClosingEventArgs e)
             {
+                if (e.CloseReason == CloseReason.ApplicationExitCall)
+                    return; // Allow Application.Exit() to proceed
                 if (_sessionActive)
                 {
                     e.Cancel = true;
@@ -419,8 +439,8 @@ namespace ChessT1
             }
             else
             {
+                btn.BackColor = BtnBg;
                 btn.Cursor = Cursors.Hand;
-                // Restore original colors handled by caller or defaults
             }
         }
 
@@ -561,7 +581,7 @@ namespace ChessT1
             ContextMenuStrip menu = new ContextMenuStrip();
             menu.Font = new Font("Arial", 11f);
 
-            menu.Items.Add("О программе", null, delegate { /* Show about/intro */ });
+            menu.Items.Add("\u041e \u043f\u0440\u043e\u0433\u0440\u0430\u043c\u043c\u0435", null, delegate { ShowIntroPage(); });
             menu.Items.Add(new ToolStripSeparator());
 
             ToolStripMenuItem saveItem = new ToolStripMenuItem("Сохранить позицию");
@@ -583,7 +603,7 @@ namespace ChessT1
 
             menu.Items.Add(new ToolStripSeparator());
 
-            menu.Items.Add("Создать ярлык", null, delegate { /* Create shortcut */ });
+            menu.Items.Add("\u0421\u043e\u0437\u0434\u0430\u0442\u044c \u044f\u0440\u043b\u044b\u043a", null, delegate { CreateShortcut(); });
             menu.Items.Add(new ToolStripSeparator());
 
             menu.Items.Add("Выход", null, delegate { CloseApp(); });
@@ -672,28 +692,7 @@ namespace ChessT1
 
         private void CloseApp()
         {
-            if (_sessionActive)
-            {
-                DialogResult result = MessageBox.Show(
-                    "Завершить текущую партию перед закрытием?",
-                    "Закрытие программы",
-                    MessageBoxButtons.YesNoCancel,
-                    MessageBoxIcon.Question);
-
-                if (result == DialogResult.Cancel)
-                    return;
-
-                if (result == DialogResult.Yes)
-                {
-                    // End session, then close
-                    _sessionActive = false;
-                }
-                // DialogResult.No: close without ending (session can be restored)
-            }
-
-            // Allow FormClosing to proceed
-            this.FormClosing -= null; // Remove the guard handler
-            Application.Exit();
+            CloseAppProper();
         }
 
         // ---- Analysis-specific handlers ----
@@ -761,15 +760,6 @@ namespace ChessT1
         }
 
         // ---- Tray management ----
-
-        private void ShowTrays()
-        {
-            _leftTrayPanel.Visible = true;
-            _rightTrayPanel.Visible = true;
-            // Left tray: white pieces if not reversed, else black
-            // Right tray: opposite
-            // Tray population would be done by dedicated tray controls
-        }
 
         private void HideTrays()
         {
@@ -887,19 +877,13 @@ namespace ChessT1
 
         private void EndSessionDialog()
         {
-            DialogResult result = MessageBox.Show(
-                "Завершить текущую партию?",
-                "Завершение партии",
-                MessageBoxButtons.YesNo,
-                MessageBoxIcon.Question);
-
-            if (result == DialogResult.Yes)
-                EndSessionNoDialog();
+            EndSessionProper();
         }
 
         private void EndSessionNoDialog()
         {
             _sessionActive = false;
+            _session.ClearSession();
             EnterStartup();
         }
 
@@ -1003,5 +987,162 @@ namespace ChessT1
             timer.Start();
         }
 
+        // ---- Intro Page ----
+
+        private void ShowIntroPage()
+        {
+            IntroPage intro = new IntroPage();
+            intro.StartPosition = FormStartPosition.CenterParent;
+            intro.Size = this.Size;
+            intro.SkipForeverRequested += delegate
+            {
+                Dictionary<string, object> cfg = GameSession.LoadConfig();
+                cfg["skip_intro"] = true;
+                GameSession.SaveConfig(cfg);
+            };
+            intro.ShowDialog(this);
+        }
+
+        // ---- Session Persistence ----
+
+        private void AutoSaveSession()
+        {
+            if (!_sessionActive) return;
+            _session.Mode = _mode;
+            _session.Stage = _stage;
+            _session.WhiteTurn = _whiteTurn;
+            _session.MoveNumber = _moveNumber;
+            _session.PartyFolder = _partyFolder;
+            _session.BoardReversed = _boardReversed;
+            _session.AnalysisFirstWhite = _analysisFirstWhite;
+            _session.MoveHistory = new List<Dictionary<string, Piece>>();
+            _session.MoveHistory.Add(PieceData.CopyPosition(_board.GetPosition()));
+            _session.HistoryIndex = 0;
+            _session.SaveSession();
+        }
+
+        private void RestoreFromSession()
+        {
+            _mode = _session.Mode ?? "party";
+            _stage = "game";
+            _sessionActive = true;
+            _whiteTurn = _session.WhiteTurn;
+            _moveNumber = _session.MoveNumber;
+            _partyFolder = _session.PartyFolder;
+            _boardReversed = _session.BoardReversed;
+            _analysisFirstWhite = _session.AnalysisFirstWhite;
+
+            _board.Reversed = _boardReversed;
+            // Restore position from session history
+            if (_session.MoveHistory != null && _session.MoveHistory.Count > 0)
+                _board.SetPosition(_session.MoveHistory[0]);
+            else
+                _board.SetPosition(PieceData.GetInitialPosition());
+
+            _moveHistory = new List<Dictionary<string, Piece>>();
+            _moveHistory.Add(PieceData.CopyPosition(_board.GetPosition()));
+            _historyIndex = 0;
+
+            _board.AppStage = _stage;
+            _board.CurrentTurnColor = _whiteTurn ? PieceColor.White : PieceColor.Black;
+            UpdateButtonStates();
+            UpdateIndicator();
+        }
+
+        // ---- Create Shortcut ----
+
+        private void CreateShortcut()
+        {
+            string desktop = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
+            string shortcutPath = System.IO.Path.Combine(desktop, "chess-T1.lnk");
+            if (System.IO.File.Exists(shortcutPath)) return; // silently do nothing
+
+            try
+            {
+                // Create a simple .bat launcher as shortcut fallback
+                string batPath = System.IO.Path.Combine(desktop, "chess-T1.bat");
+                if (!System.IO.File.Exists(batPath))
+                {
+                    string exePath = Application.ExecutablePath;
+                    System.IO.File.WriteAllText(batPath,
+                        "@echo off\r\nstart \"\" \"" + exePath + "\"\r\n");
+                    MessageBox.Show("\u042f\u0440\u043b\u044b\u043a \u0441\u043e\u0437\u0434\u0430\u043d \u043d\u0430 \u0440\u0430\u0431\u043e\u0447\u0435\u043c \u0441\u0442\u043e\u043b\u0435.",
+                        "chess-T1", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("\u041d\u0435 \u0443\u0434\u0430\u043b\u043e\u0441\u044c \u0441\u043e\u0437\u0434\u0430\u0442\u044c \u044f\u0440\u043b\u044b\u043a:\n" + ex.Message,
+                    "\u041e\u0448\u0438\u0431\u043a\u0430", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        // ---- Show Trays with PieceTray controls ----
+
+        private void ShowTrays()
+        {
+            _leftTrayPanel.Controls.Clear();
+            _rightTrayPanel.Controls.Clear();
+
+            PieceColor leftColor = _boardReversed ? PieceColor.Black : PieceColor.White;
+            PieceColor rightColor = _boardReversed ? PieceColor.White : PieceColor.Black;
+
+            PieceTray leftTray = new PieceTray(leftColor, _board);
+            leftTray.Dock = DockStyle.Fill;
+            _leftTrayPanel.Controls.Add(leftTray);
+
+            PieceTray rightTray = new PieceTray(rightColor, _board);
+            rightTray.Dock = DockStyle.Fill;
+            _rightTrayPanel.Controls.Add(rightTray);
+
+            _leftTrayPanel.Visible = true;
+            _rightTrayPanel.Visible = true;
+        }
+
+        // ---- Close App with proper dialog ----
+
+        private void CloseAppProper()
+        {
+            if (_sessionActive)
+            {
+                CloseAppDialog dlg = new CloseAppDialog();
+                dlg.StartPosition = FormStartPosition.CenterParent;
+                if (dlg.ShowDialog(this) == DialogResult.OK)
+                {
+                    CloseAppResult result = dlg.Result;
+                    if (result.Action == CloseAppAction.EndAndClose)
+                    {
+                        if (result.SavePosition) SavePosition();
+                        _session.ClearSession();
+                        Application.Exit();
+                    }
+                    else if (result.Action == CloseAppAction.CloseKeepSession)
+                    {
+                        if (result.SavePosition) SavePosition();
+                        AutoSaveSession();
+                        Application.Exit();
+                    }
+                }
+                // Cancel: do nothing
+            }
+            else
+            {
+                _session.ClearSession();
+                Application.Exit();
+            }
+        }
+
+        // ---- End Session with proper dialog ----
+
+        private void EndSessionProper()
+        {
+            EndSessionDialog dlg = new EndSessionDialog();
+            dlg.StartPosition = FormStartPosition.CenterParent;
+            if (dlg.ShowDialog(this) == DialogResult.OK)
+            {
+                if (dlg.Result != null && dlg.Result.SavePosition) SavePosition();
+                EndSessionNoDialog();
+            }
+        }
     }
 }
