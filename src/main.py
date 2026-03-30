@@ -93,7 +93,7 @@ class ChessT1App:
     def __init__(self):
         self.root = tk.Tk()
         self.root.title("chess-T1")
-        self.root.configure(bg="#263238")
+        self.root.configure(bg="#E8ECF0")
 
         # Keep standard window frame for proper Windows behavior
         # (resize, topmost, taskbar icon all work correctly)
@@ -148,7 +148,7 @@ class ChessT1App:
     def _build_ui(self):
         """Build the main UI layout."""
         # Main container
-        self.main_frame = tk.Frame(self.root, bg="#263238")
+        self.main_frame = tk.Frame(self.root, bg="#E8ECF0")
         self.main_frame.pack(fill="both", expand=True)
 
         # Top toolbar
@@ -160,13 +160,13 @@ class ChessT1App:
         self.bottom_toolbar.pack(fill="x", side="bottom")
 
         # Center area (trays + board)
-        self.center_frame = tk.Frame(self.main_frame, bg="#263238")
+        self.center_frame = tk.Frame(self.main_frame, bg="#E8ECF0")
         self.center_frame.pack(fill="both", expand=True)
 
         # Board
         self.board = GameBoard(
             self.center_frame, self,
-            bg="#263238", highlightthickness=0
+            bg="#E8ECF0", highlightthickness=0
         )
         self.board.pack(fill="both", expand=True, padx=10, pady=10)
 

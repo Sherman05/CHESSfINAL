@@ -11,7 +11,8 @@ class PieceTray(tk.Frame):
     """Tray showing all pieces of one color for drag & drop to board."""
 
     def __init__(self, parent, color, board, piece_images, cell_size, **kwargs):
-        bg = "#1A237E" if color == BLACK else "#E8EAF6"
+        # Mockup: dark tray for black, light for white
+        bg = "#3A3A3A" if color == BLACK else "#E0E4E8"
         super().__init__(parent, bg=bg, bd=2, relief="raised", **kwargs)
         self.color = color
         self.board = board

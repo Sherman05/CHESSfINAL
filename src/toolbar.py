@@ -9,15 +9,17 @@ import os
 import sys
 
 
-# Button style constants
-BTN_BG = "#37474F"
-BTN_FG = "white"
-BTN_ACTIVE_BG = "#546E7A"
-BTN_DISABLED_BG = "#78909C"
-BTN_HIGHLIGHT_BG = "#1B5E20"
+# Button style constants — matching PDF mockup (light theme)
+BTN_BG = "#C0C8D0"           # Light grey buttons (per mockup)
+BTN_FG = "#1A1A1A"           # Dark text
+BTN_ACTIVE_BG = "#A8B4C0"    # Hover
+BTN_DISABLED_BG = "#D8DDE2"  # Frozen
+BTN_HIGHLIGHT_BG = "#4A90C8" # Active mode highlight (blue)
 BTN_FONT = ("Arial", 10)
 BTN_FONT_SMALL = ("Arial", 9)
-TOOLBAR_BG = "#263238"
+TOOLBAR_TOP_BG = "#5BA3D9"   # Top bar: blue gradient (per mockup)
+TOOLBAR_BOT_BG = "#C8CED4"   # Bottom bar: light grey (per mockup)
+TOOLBAR_BG = TOOLBAR_BOT_BG  # Default for compatibility
 ICON_SIZE = 28  # Button icon size in pixels
 
 
@@ -173,10 +175,10 @@ class ToolButton(tk.Button):
 
 
 class TopToolbar(tk.Frame):
-    """Top row of control buttons."""
+    """Top row of control buttons — blue bar matching PDF mockup."""
 
     def __init__(self, parent, app, **kwargs):
-        super().__init__(parent, bg=TOOLBAR_BG, **kwargs)
+        super().__init__(parent, bg=TOOLBAR_TOP_BG, **kwargs)
         self.app = app
 
         # Buttons with SVG icons from customer's design files
@@ -200,7 +202,7 @@ class TopToolbar(tk.Frame):
         self.btn_analysis.pack(side="left", padx=2, pady=4)
 
         # Spacer
-        tk.Frame(self, bg=TOOLBAR_BG).pack(side="left", fill="x", expand=True)
+        tk.Frame(self, bg=TOOLBAR_TOP_BG).pack(side="left", fill="x", expand=True)
 
         self.btn_minimize = ToolButton(
             self, symbol="\u2014", icon_name="btn_minimize",
@@ -238,7 +240,7 @@ class TopToolbar(tk.Frame):
         if mode == "party":
             self.btn_party.freeze()
             self.btn_party.highlight(True)
-            self.btn_party.config(bg="#43A047")  # Bright green = party active
+            self.btn_party.config(bg="#66BB6A")  # Green highlight = party active
         elif mode == "analysis" and stage == "setup_position":
             self.btn_party.freeze()
         else:
@@ -258,10 +260,10 @@ class TopToolbar(tk.Frame):
 
 
 class BottomToolbar(tk.Frame):
-    """Bottom row of control buttons."""
+    """Bottom row — light grey bar matching PDF mockup."""
 
     def __init__(self, parent, app, **kwargs):
-        super().__init__(parent, bg=TOOLBAR_BG, **kwargs)
+        super().__init__(parent, bg=TOOLBAR_BOT_BG, **kwargs)
         self.app = app
 
         # Menu: circle with 3 horizontal lines (from SVG design)
@@ -275,7 +277,7 @@ class BottomToolbar(tk.Frame):
         self.indicator_var = tk.StringVar(value="")
         self.indicator_label = tk.Label(
             self, textvariable=self.indicator_var,
-            font=("Arial", 11, "bold"), fg="#FFD700", bg=TOOLBAR_BG,
+            font=("Arial", 11, "bold"), fg="#1A237E", bg=TOOLBAR_BOT_BG,
             padx=10
         )
         self.indicator_label.pack(side="left", padx=5)
@@ -332,8 +334,8 @@ class BottomToolbar(tk.Frame):
 
         # Resize grip
         self.grip = tk.Label(
-            self, text="⇲", font=("Arial", 14),
-            fg="#888", bg=TOOLBAR_BG, cursor="bottom_right_corner"
+            self, text="\u21f2", font=("Arial", 14),
+            fg="#888", bg=TOOLBAR_BOT_BG, cursor="bottom_right_corner"
         )
         self.grip.pack(side="right", padx=5)
 
