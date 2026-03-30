@@ -478,7 +478,7 @@ namespace ChessT1
                 g.DrawEllipse(outline, oval);
             }
 
-            string abbr = PieceData.GetShortName(piece.Type);
+            string abbr = PieceData.ShortNames[piece.Type];
             int textSize = Math.Max(8, _cellSize / 4);
             using (Font textFont = new Font("Arial", textSize, FontStyle.Bold))
             using (SolidBrush textBrush = new SolidBrush(textColor))
@@ -694,7 +694,7 @@ namespace ChessT1
             _lastMoveCell = targetCell;
 
             // Check Knekht auto-promotion to Ver Knekht
-            Piece promoted = PieceData.CheckKnekhtPromotion(targetCell, piece);
+            Piece promoted = PieceData.CheckKnechtPromotion(targetCell, piece);
             if (promoted != null)
             {
                 _position[targetCell] = promoted;
@@ -702,7 +702,7 @@ namespace ChessT1
             }
 
             // Check Ver Knekht promotion choice
-            PieceType[] vkOptions = PieceData.CheckVerKnekhtPromotion(targetCell, piece);
+            PieceType[] vkOptions = PieceData.CheckVerKnechtPromotion(targetCell, piece);
             if (vkOptions != null)
             {
                 Invalidate();
