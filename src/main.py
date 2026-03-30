@@ -452,12 +452,19 @@ class ChessT1App:
         self._update_indicator()
 
     def _recalculate_turn_from_history(self):
-        """Recalculate move number and turn from history index."""
+        """Recalculate move number and turn from history index.
+        Spec 7.3: номер увеличивается после хода чёрных.
+        White-first: 1.хб → 1…хч → 2.хб → 2…хч → 3.хб
+        Black-first: 1…хч → 2.хб → 2…хч → 3.хб → 3…хч
+        """
         idx = self.history_index
         if self.mode == "analysis" and not self.analysis_first_white:
+            # Black starts: idx=0 is black's turn (move 1)
+            # After black moves (idx=1), number increments to 2
             self.white_turn = (idx % 2 == 1)
-            self.move_number = (idx // 2) + 1
+            self.move_number = ((idx + 1) // 2) + 1
         else:
+            # White starts (standard)
             self.white_turn = (idx % 2 == 0)
             self.move_number = (idx // 2) + 1
 

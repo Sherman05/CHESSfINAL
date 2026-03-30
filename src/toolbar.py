@@ -364,8 +364,11 @@ class BottomToolbar(tk.Frame):
         else:
             self.btn_reverse.unfreeze()
 
-        # Delete: available in analysis mode and in startup (if razvedchik not implemented via special move)
-        self.btn_delete.unfreeze()
+        # Delete: frozen in startup (spec 4.1 — not listed as active)
+        if stage == "startup":
+            self.btn_delete.freeze()
+        else:
+            self.btn_delete.unfreeze()
 
         # Show analysis buttons only in setup_position stage
         self.show_analysis_buttons(stage == "setup_position")
