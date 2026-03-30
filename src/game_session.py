@@ -105,25 +105,29 @@ def clear_session():
         pass
 
 
-def get_screenshot_name(move_number, white_turn):
-    """Generate screenshot filename based on move indicator.
-    White turn: '1. __ хб'
-    Black turn: '8 ... __ хч'
-    Note: Windows forbids characters like … in filenames, using '...' instead.
-    Also dots before space can be problematic, using underscore separator.
-    """
-    if white_turn:
-        return f"{move_number}_хб.png"
-    else:
-        return f"{move_number}_хч.png"
-
-
 def get_indicator_text(move_number, white_turn):
     """Get display text for the move indicator (used in UI)."""
     if white_turn:
         return f"{move_number}. __ хб"
     else:
         return f"{move_number} \u2026 __ хч"
+
+
+def get_screenshot_name(move_number, white_turn):
+    """Generate screenshot filename based on move indicator text (spec 10.3).
+    Sanitizes characters forbidden in Windows filenames.
+    """
+    name = get_indicator_text(move_number, white_turn)
+    # Replace Windows-forbidden characters: < > : " / \ | ? *
+    # Also replace … (ellipsis) with ... for filesystem compatibility
+    forbidden = {
+        '\u2026': '...',
+        ':': '',
+        '<': '', '>': '', '"': '', '/': '', '\\': '', '|': '', '?': '', '*': '',
+    }
+    for char, replacement in forbidden.items():
+        name = name.replace(char, replacement)
+    return f"{name}.png"
 
 
 def get_screenshot_dir(party_folder):

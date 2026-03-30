@@ -205,7 +205,12 @@ class ChessT1App:
         )
 
     def _on_intro_closed(self):
-        """Called when intro page is closed."""
+        """Called when intro page is closed.
+        Returns to the same mode and position that was before (spec 3.2).
+        """
+        if self.mode is not None:
+            # Already in a mode (party/analysis) — just return, don't reset
+            return
         if not self.session_active:
             self._enter_startup()
 
@@ -343,7 +348,7 @@ class ChessT1App:
         CreateFolderDialog(
             self.root,
             on_created=lambda path: self._on_analysis_confirmed(path, position),
-            on_cancel=lambda: self._on_analysis_confirmed(None, position)
+            on_cancel=None  # Stay in setup_position if cancelled
         )
 
     def _on_analysis_confirmed(self, folder_path, position):
@@ -506,10 +511,16 @@ class ChessT1App:
         menu.add_separator()
         menu.add_command(label="Выход", command=self.close_app)
 
-        # Position left of menu button
+        # Position menu to the LEFT beyond window edge (spec 10.1)
         btn = self.bottom_toolbar.btn_menu
-        x = btn.winfo_rootx()
-        y = btn.winfo_rooty() - 10
+        menu.update_idletasks()
+        menu_width = menu.winfo_reqwidth()
+        x = btn.winfo_rootx() - menu_width
+        y = btn.winfo_rooty() - menu.winfo_reqheight()
+        if x < 0:
+            x = 0
+        if y < 0:
+            y = btn.winfo_rooty() + btn.winfo_height()
         try:
             menu.tk_popup(x, y, 0)
         finally:
@@ -607,8 +618,7 @@ class ChessT1App:
         if sys.platform == "win32":
             shortcut_path = os.path.join(desktop, "chess-T1.lnk")
             if os.path.exists(shortcut_path):
-                messagebox.showinfo("Ярлык", "Ярлык уже существует.", parent=self.root)
-                return
+                return  # Already exists — do nothing (spec 10.1)
             try:
                 exe_path = _get_executable_path()
                 _create_windows_shortcut(shortcut_path, exe_path)
@@ -618,8 +628,7 @@ class ChessT1App:
         else:
             shortcut_path = os.path.join(desktop, "chess-T1.desktop")
             if os.path.exists(shortcut_path):
-                messagebox.showinfo("Ярлык", "Ярлык уже существует.", parent=self.root)
-                return
+                return  # Already exists — do nothing (spec 10.1)
             try:
                 exe_path = _get_executable_path()
                 with open(shortcut_path, "w") as f:

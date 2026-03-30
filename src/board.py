@@ -295,7 +295,9 @@ class GameBoard(tk.Canvas):
         key = (piece.color, piece.piece_type)
         if key in self.piece_images:
             img = self.piece_images[key]
-            item_id = self.create_image(cx, cy + 2, image=img, anchor="center")
+            # Spec 5.2: bottom edge with offset from cell bottom
+            bottom_offset = max(2, int(self.cell_size * 0.05))
+            item_id = self.create_image(cx, y2 - bottom_offset, image=img, anchor="s")
         else:
             from pieces import PIECE_SHORT_NAMES
             text_color = "#FFFFFF" if piece.color == BLACK else "#000000"
@@ -414,6 +416,9 @@ class GameBoard(tk.Canvas):
         self.clear_highlights()
 
         target_cell = self.pixel_to_cell(event.x, event.y)
+        # Spec 7.6: piece dropped between cells snaps to last highlighted cell
+        if target_cell is None and self.hover_cell is not None:
+            target_cell = self.hover_cell
         piece = self.drag_piece
         from_cell = self.drag_from_cell
         from_tray = self.drag_from_tray
@@ -433,6 +438,8 @@ class GameBoard(tk.Canvas):
                 if from_cell and from_cell in self.position:
                     del self.position[from_cell]
                 self.redraw()
+                # Show horizontal double arrow at nearest board edge
+                self._show_exit_arrow(event.x, event.y)
                 self.app.on_piece_exited_board()
                 return
 
@@ -517,6 +524,34 @@ class GameBoard(tk.Canvas):
             self.redraw()
             return True
         return False
+
+    def _show_exit_arrow(self, px, py):
+        """Show horizontal double arrow at the nearest board edge (spec 7.6)."""
+        board_left = self.board_x
+        board_right = self.board_x + 8 * self.cell_size
+        board_top = self.board_y
+        board_bottom = self.board_y + 8 * self.cell_size
+
+        # Find nearest edge point
+        cx = max(board_left, min(px, board_right))
+        cy = max(board_top, min(py, board_bottom))
+        # Clamp to edge
+        if px < board_left:
+            cx = board_left
+        elif px > board_right:
+            cx = board_right
+        if py < board_top:
+            cy = board_top
+        elif py > board_bottom:
+            cy = board_bottom
+
+        arrow_size = self.cell_size // 2
+        self.create_text(
+            cx, cy, text="\u2194", font=("Arial", arrow_size, "bold"),
+            fill="#CC0000", tags="exit_arrow"
+        )
+        # Auto-remove after 2 seconds
+        self.after(2000, lambda: self.delete("exit_arrow"))
 
     def set_position(self, position):
         """Set board position."""

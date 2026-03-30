@@ -144,6 +144,7 @@ class PromotionDialog(tk.Toplevel):
         super().__init__(parent)
         self.on_chosen = on_chosen
         self.chosen = None
+        self._scaled_images = []  # prevent GC of scaled images
 
         self.overrideredirect(True)
         self.configure(bg="#2C3E6B", bd=3, relief="raised")
@@ -166,8 +167,12 @@ class PromotionDialog(tk.Toplevel):
 
             key = (piece.color, ptype)
             if key in piece_images:
+                # Scale to ~80% of board icon size (spec 11)
+                orig = piece_images[key]
+                scaled = self._scale_photo_image(orig, 0.8)
+                self._scaled_images.append(scaled)
                 btn = tk.Button(
-                    btn_frame, image=piece_images[key],
+                    btn_frame, image=scaled,
                     command=lambda pt=ptype: self._choose(pt),
                     bg="#4A5A8A", activebackground="#6A7AAA",
                     relief="raised", bd=2
@@ -207,6 +212,28 @@ class PromotionDialog(tk.Toplevel):
 
         self.geometry(f"+{x}+{y}")
         self.grab_set()
+
+    @staticmethod
+    def _scale_photo_image(photo_image, scale):
+        """Scale a tkinter PhotoImage by a factor (e.g. 0.8 = 80%)."""
+        w = photo_image.width()
+        h = photo_image.height()
+        new_w = max(1, int(w * scale))
+        new_h = max(1, int(h * scale))
+        scaled = tk.PhotoImage(width=new_w, height=new_h)
+        # Use subsample/zoom for approximate scaling
+        # PhotoImage only supports integer zoom/subsample, so approximate
+        if scale < 1.0:
+            factor = max(1, round(1 / scale))
+            temp = photo_image.subsample(factor, factor)
+            zoom = max(1, round(factor * scale))
+            if zoom > 1:
+                scaled = temp.zoom(zoom, zoom)
+            else:
+                scaled = temp
+        else:
+            scaled = photo_image.copy()
+        return scaled
 
     def _choose(self, ptype):
         self.chosen = ptype
