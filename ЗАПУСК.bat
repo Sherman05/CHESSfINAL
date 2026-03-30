@@ -1,15 +1,10 @@
 @echo off
 chcp 65001 >nul 2>&1
 
-:: Try portable Python first (from СБОРКА.bat)
+:: Try portable Python first
 if exist "%~dp0python\python.exe" (
-    start "" "%~dp0python\pythonw.exe" "%~dp0run.py"
-    exit /b 0
-)
-
-:: Try portable Python in parent (if running from dist_standalone)
-if exist "%~dp0..\python\python.exe" (
-    start "" "%~dp0..\python\pythonw.exe" "%~dp0run.py"
+    "%~dp0python\python.exe" "%~dp0run.py"
+    if errorlevel 1 pause
     exit /b 0
 )
 
@@ -24,3 +19,4 @@ if errorlevel 1 (
 
 python -m pip install pillow --quiet --disable-pip-version-check >nul 2>&1
 python "%~dp0run.py"
+if errorlevel 1 pause
