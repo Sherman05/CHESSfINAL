@@ -16,15 +16,15 @@ from pieces import (
     PIECE_FULL_NAMES, ICON_FILES
 )
 
-# Colors — matching the PDF mockup "Расширенный вид ГИ"
-COLOR_WHITE_CELL = "#FFFFFF"      # White cells (pure white per mockup)
-COLOR_BLACK_CELL = "#C0C0C0"      # Black cells (grey per mockup)
-COLOR_CASTLE_CELL = "#E8E8E8"     # Castle cells (light grey, distinct from both)
+# Colors — spec: "чёрные (тёмно-серые) и белые", castle "светло-серые"
+COLOR_WHITE_CELL = "#FFFFFF"      # White cells
+COLOR_BLACK_CELL = "#808080"      # Black cells — тёмно-серые (dark grey per spec)
+COLOR_CASTLE_CELL = "#C8C8C8"     # Castle cells — светло-серые, distinct from both
 COLOR_HIGHLIGHT_START = "#FFFF00"
 COLOR_HIGHLIGHT_HOVER = "#90EE90"
 COLOR_HIGHLIGHT_LAST = "#CED26B"
-COLOR_BORDER = "#4A90C8"          # Blue border (matching mockup frame)
-COLOR_NOTATION = "#1A237E"        # Dark blue notation text
+COLOR_BORDER = "#4A90C8"          # Blue border (синий/голубой per spec)
+COLOR_NOTATION = "#D0D8E8"        # Light blue-grey notation (readable on dark bg)
 
 
 class GameBoard(tk.Canvas):
@@ -244,6 +244,21 @@ class GameBoard(tk.Canvas):
 
                 rect_id = self.create_rectangle(x1, y1, x2, y2, fill=fill, outline="")
                 self.cell_items[cell_name] = rect_id
+
+                # Castle cells: add diagonal hatching (штриховка per spec)
+                if cell_name in WHITE_CASTLE or cell_name in BLACK_CASTLE:
+                    step = max(8, self.cell_size // 6)
+                    for offset in range(-self.cell_size, self.cell_size * 2, step):
+                        lx1 = max(x1, x1 + offset)
+                        ly1 = max(y1, y1)
+                        lx2 = min(x2, x1 + offset + self.cell_size)
+                        ly2 = min(y2, y1 + self.cell_size)
+                        if lx1 < x2 and lx2 > x1:
+                            self.create_line(
+                                max(x1, x1 + offset), y1,
+                                min(x2, x1 + offset + self.cell_size), y2,
+                                fill="#A0A0A0", width=1, tags="hatching"
+                            )
 
         # Highlight last move
         if self.last_move_cell and self.last_move_cell in self.cell_items:

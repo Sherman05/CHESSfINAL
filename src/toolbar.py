@@ -149,7 +149,7 @@ class TopToolbar(tk.Frame):
         if mode == "party":
             self.btn_party.freeze()
             self.btn_party.highlight(True)
-            self.btn_party.config(bg=BTN_HIGHLIGHT_BG)
+            self.btn_party.config(bg="#43A047")  # Bright green = party active
         elif mode == "analysis" and stage == "setup_position":
             self.btn_party.freeze()
         else:
@@ -163,7 +163,7 @@ class TopToolbar(tk.Frame):
         if mode == "analysis":
             self.btn_analysis.freeze()
             self.btn_analysis.highlight(True)
-            self.btn_analysis.config(bg=BTN_HIGHLIGHT_BG)
+            self.btn_analysis.config(bg="#1E88E5")  # Bright blue = analysis active
         else:
             self.btn_analysis.unfreeze()
 

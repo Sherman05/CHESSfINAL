@@ -322,14 +322,19 @@ class ChessT1App:
         self._update_first_move_button()
 
     def _update_first_move_button(self):
-        """Update the first move button appearance."""
+        """Update the first move button: white/black rectangles with indicator dot.
+        Spec 9.1: два прямоугольника — белый и чёрный, выбор индицируется кружком.
+        Using Unicode blocks and circles to approximate the SVG mockup.
+        """
         if self.analysis_first_white:
+            # White selected: ● on white side
             self.bottom_toolbar.btn_first_move.config(
-                text="1-й ход: Б", bg="#EEEEEE", fg="#333"
+                text="\u25cf\u2588  \u2591", bg="#DDDDDD", fg="#222"
             )
         else:
+            # Black selected: ● on black side
             self.bottom_toolbar.btn_first_move.config(
-                text="1-й ход: Ч", bg="#333333", fg="white"
+                text="\u2591  \u2588\u25cf", bg="#444444", fg="white"
             )
 
     def analysis_confirm(self):
@@ -527,10 +532,9 @@ class ChessT1App:
         menu_height = menu.winfo_reqheight()
 
         # Right edge of menu = left edge of board notation (board_x)
+        # Spec: menu extends LEFT beyond window edge — no clamping
         board_screen_x = self.board.winfo_rootx() + self.board.board_x
         x = board_screen_x - menu_width
-        if x < 0:
-            x = 0
 
         # Vertical: open upward from bottom toolbar
         btn = self.bottom_toolbar.btn_menu

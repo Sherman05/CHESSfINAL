@@ -215,25 +215,23 @@ class PromotionDialog(tk.Toplevel):
 
     @staticmethod
     def _scale_photo_image(photo_image, scale):
-        """Scale a tkinter PhotoImage by a factor (e.g. 0.8 = 80%)."""
-        w = photo_image.width()
-        h = photo_image.height()
-        new_w = max(1, int(w * scale))
-        new_h = max(1, int(h * scale))
-        scaled = tk.PhotoImage(width=new_w, height=new_h)
-        # Use subsample/zoom for approximate scaling
-        # PhotoImage only supports integer zoom/subsample, so approximate
-        if scale < 1.0:
-            factor = max(1, round(1 / scale))
-            temp = photo_image.subsample(factor, factor)
-            zoom = max(1, round(factor * scale))
-            if zoom > 1:
-                scaled = temp.zoom(zoom, zoom)
-            else:
-                scaled = temp
+        """Scale a tkinter PhotoImage to ~80% using zoom+subsample trick.
+        For 80%: zoom 4x then subsample 5x = 4/5 = 0.8 exactly.
+        """
+        if abs(scale - 0.8) < 0.05:
+            # 80%: zoom 4, subsample 5 -> exact 4/5 ratio
+            zoomed = photo_image.zoom(4, 4)
+            return zoomed.subsample(5, 5)
+        elif abs(scale - 0.5) < 0.05:
+            return photo_image.subsample(2, 2)
+        elif abs(scale - 0.75) < 0.05:
+            zoomed = photo_image.zoom(3, 3)
+            return zoomed.subsample(4, 4)
         else:
-            scaled = photo_image.copy()
-        return scaled
+            # General case: approximate via nearest integer ratio
+            num = max(1, round(scale * 5))
+            zoomed = photo_image.zoom(num, num)
+            return zoomed.subsample(5, 5)
 
     def _choose(self, ptype):
         self.chosen = ptype

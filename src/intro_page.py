@@ -154,8 +154,8 @@ class IntroPage(tk.Toplevel):
 
         # "Основной режим" button (closes intro, opens main view)
         btn_main = tk.Button(
-            top_bar, text="Основной\nрежим",
-            font=("Arial", 9, "bold"), command=self._go_to_main,
+            top_bar, text="Основной режим",
+            font=("Arial", 10, "bold"), command=self._go_to_main,
             bg=COLOR_BTN_MAIN, fg="white", relief="raised",
             padx=12, pady=4, bd=2
         )
