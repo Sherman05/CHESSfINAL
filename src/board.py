@@ -155,32 +155,76 @@ class GameBoard(tk.Canvas):
         return base64.b64encode(buf.getvalue())
 
     def _create_text_icon(self, color, ptype, icon_height):
-        """Create a simple circle icon as fallback using row-based put for speed."""
+        """Create piece icon via Pillow drawing. Shows piece abbreviation
+        in a styled circle with proper colors."""
+        from pieces import PIECE_SHORT_NAMES
         size = max(icon_height, 30)
-        img = tk.PhotoImage(width=size, height=size)
 
-        fill_color = "#FFFFFF" if color == WHITE else "#333333"
-        outline_color = "#333333" if color == WHITE else "#FFFFFF"
-        transparent = ""
-        r = size // 2 - 2
-        cx, cy = size // 2, size // 2
+        try:
+            from PIL import Image, ImageDraw, ImageFont
+            import io
+            import base64
 
-        # Build image row by row (much faster than pixel by pixel)
-        for y in range(size):
-            row = []
-            for x in range(size):
-                dx = x - cx
-                dy = y - cy
-                dist_sq = dx * dx + dy * dy
-                if dist_sq <= r * r:
-                    row.append(fill_color)
-                elif dist_sq <= (r + 2) * (r + 2):
-                    row.append(outline_color)
-                else:
-                    row.append(transparent)
-            img.put("{" + " ".join(row) + "}", to=(0, y))
+            img = Image.new("RGBA", (size, size), (0, 0, 0, 0))
+            draw = ImageDraw.Draw(img)
 
-        self.piece_images[(color, ptype)] = img
+            # Colors
+            if color == WHITE:
+                fill = (240, 240, 240, 255)
+                outline = (60, 60, 60, 255)
+                text_col = (30, 30, 30, 255)
+            else:
+                fill = (50, 50, 50, 255)
+                outline = (200, 200, 200, 255)
+                text_col = (230, 230, 230, 255)
+
+            # Draw circle
+            margin = 2
+            draw.ellipse([margin, margin, size - margin, size - margin],
+                         fill=fill, outline=outline, width=2)
+
+            # Draw text
+            abbr = PIECE_SHORT_NAMES[ptype]
+            font_size = max(10, size // 3)
+            try:
+                font = ImageFont.truetype("arial.ttf", font_size)
+            except (OSError, IOError):
+                try:
+                    font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", font_size)
+                except (OSError, IOError):
+                    font = ImageFont.load_default()
+
+            bbox = draw.textbbox((0, 0), abbr, font=font)
+            tw, th = bbox[2] - bbox[0], bbox[3] - bbox[1]
+            tx = (size - tw) // 2
+            ty = (size - th) // 2 - 2
+            draw.text((tx, ty), abbr, fill=text_col, font=font)
+
+            buf = io.BytesIO()
+            img.save(buf, format="PNG")
+            photo = tk.PhotoImage(data=base64.b64encode(buf.getvalue()))
+            self.piece_images[(color, ptype)] = photo
+
+        except ImportError:
+            # No Pillow — use basic PhotoImage
+            photo = tk.PhotoImage(width=size, height=size)
+            fill_hex = "#F0F0F0" if color == WHITE else "#333333"
+            outline_hex = "#333333" if color == WHITE else "#F0F0F0"
+            r = size // 2 - 2
+            cx, cy = size // 2, size // 2
+            for y in range(size):
+                row = []
+                for x in range(size):
+                    dx, dy = x - cx, y - cy
+                    dist_sq = dx * dx + dy * dy
+                    if dist_sq <= r * r:
+                        row.append(fill_hex)
+                    elif dist_sq <= (r + 2) * (r + 2):
+                        row.append(outline_hex)
+                    else:
+                        row.append("")
+                photo.put("{" + " ".join(row) + "}", to=(0, y))
+            self.piece_images[(color, ptype)] = photo
 
     def get_cell_rect(self, col, row):
         """Get pixel rectangle for a board cell (considering board orientation)."""

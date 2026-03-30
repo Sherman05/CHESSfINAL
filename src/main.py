@@ -95,19 +95,21 @@ class ChessT1App:
         self.root.title("chess-T1")
         self.root.configure(bg="#263238")
 
-        # Remove OS title bar — custom buttons only (matches PDF mockup)
-        self.root.overrideredirect(True)
+        # Keep standard window frame for proper Windows behavior
+        # (resize, topmost, taskbar icon all work correctly)
+        self.root.resizable(True, True)
 
-        # Maximize to screen size
-        screen_w = self.root.winfo_screenwidth()
-        screen_h = self.root.winfo_screenheight()
-        self.root.geometry(f"{screen_w}x{screen_h}+0+0")
+        # Maximize window
+        try:
+            self.root.state("zoomed")
+        except tk.TclError:
+            try:
+                self.root.attributes("-zoomed", True)
+            except tk.TclError:
+                self.root.geometry("1024x768")
 
         self.root.minsize(700, 500)
-
-        # Draggable window (since no titlebar)
-        self._drag_x = 0
-        self._drag_y = 0
+        self.root.protocol("WM_DELETE_WINDOW", self.close_app)
 
         # Application state
         self.mode = None  # None, "party", "analysis"
@@ -149,21 +151,13 @@ class ChessT1App:
         self.main_frame = tk.Frame(self.root, bg="#263238")
         self.main_frame.pack(fill="both", expand=True)
 
-        # Top toolbar (draggable — serves as custom title bar)
+        # Top toolbar
         self.top_toolbar = TopToolbar(self.main_frame, self)
         self.top_toolbar.pack(fill="x", side="top")
-        self.top_toolbar.bind("<Button-1>", self._start_drag_window)
-        self.top_toolbar.bind("<B1-Motion>", self._drag_window)
 
         # Bottom toolbar
         self.bottom_toolbar = BottomToolbar(self.main_frame, self)
         self.bottom_toolbar.pack(fill="x", side="bottom")
-
-        # Bind resize grip
-        self._resize_x = 0
-        self._resize_y = 0
-        self.bottom_toolbar.grip.bind("<Button-1>", self._start_resize)
-        self.bottom_toolbar.grip.bind("<B1-Motion>", self._do_resize)
 
         # Center area (trays + board)
         self.center_frame = tk.Frame(self.main_frame, bg="#263238")
@@ -692,43 +686,10 @@ class ChessT1App:
 
     # ---- Window Management ----
 
-    def _start_drag_window(self, event):
-        """Start dragging the window (custom titlebar)."""
-        self._drag_x = event.x_root
-        self._drag_y = event.y_root
-
-    def _drag_window(self, event):
-        """Drag window by top toolbar."""
-        dx = event.x_root - self._drag_x
-        dy = event.y_root - self._drag_y
-        x = self.root.winfo_x() + dx
-        y = self.root.winfo_y() + dy
-        self.root.geometry(f"+{x}+{y}")
-        self._drag_x = event.x_root
-        self._drag_y = event.y_root
-
-    def _start_resize(self, event):
-        """Start resizing from bottom-right grip."""
-        self._resize_x = event.x_root
-        self._resize_y = event.y_root
-
-    def _do_resize(self, event):
-        """Resize window by dragging grip."""
-        dx = event.x_root - self._resize_x
-        dy = event.y_root - self._resize_y
-        new_w = max(700, self.root.winfo_width() + dx)
-        new_h = max(500, self.root.winfo_height() + dy)
-        self.root.geometry(f"{new_w}x{new_h}")
-        self._resize_x = event.x_root
-        self._resize_y = event.y_root
-
     def minimize_window(self):
         if self.promotion_pending:
             return
-        # overrideredirect windows: temporarily show titlebar to iconify
-        self.root.overrideredirect(False)
         self.root.iconify()
-        self.root.after(100, lambda: self.root.overrideredirect(True))
 
     def toggle_always_on_top(self):
         self.always_on_top = not self.always_on_top
