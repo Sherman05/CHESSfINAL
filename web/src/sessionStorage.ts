@@ -1,4 +1,4 @@
-import { GameState, Position } from './types';
+import type { GameState, Position } from './types';
 
 const SESSION_KEY = 'chess-t1-session';
 const CONFIG_KEY = 'chess-t1-config';

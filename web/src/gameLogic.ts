@@ -1,4 +1,5 @@
-import { PieceType, PieceColor, Piece, Position, AppMode } from './types';
+import { PieceType, PieceColor } from './types';
+import type { Piece, Position, AppMode } from './types';
 
 // ---------------------------------------------------------------------------
 // Short and full Russian names for each piece type

@@ -1,17 +1,21 @@
-export enum PieceType {
-  King,
-  Konnet,
-  Prince,
-  Ritter,
-  Knekht,
-  VerKnekht,
-  Razvedchik,
-}
+export const PieceType = {
+  King: 0,
+  Konnet: 1,
+  Prince: 2,
+  Ritter: 3,
+  Knekht: 4,
+  VerKnekht: 5,
+  Razvedchik: 6,
+} as const;
 
-export enum PieceColor {
-  White,
-  Black,
-}
+export type PieceType = (typeof PieceType)[keyof typeof PieceType];
+
+export const PieceColor = {
+  White: 0,
+  Black: 1,
+} as const;
+
+export type PieceColor = (typeof PieceColor)[keyof typeof PieceColor];
 
 export interface Piece {
   color: PieceColor;
