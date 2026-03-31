@@ -1,4 +1,4 @@
-import { AppStage } from '../types';
+import type { AppStage } from '../types';
 
 interface MenuPopupProps {
   stage: AppStage;

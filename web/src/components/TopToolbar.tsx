@@ -1,4 +1,4 @@
-import { AppMode, AppStage } from '../types';
+import type { AppMode, AppStage } from '../types';
 
 interface TopToolbarProps {
   mode: AppMode;

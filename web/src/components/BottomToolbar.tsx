@@ -1,4 +1,4 @@
-import { AppMode, AppStage } from '../types';
+import type { AppMode, AppStage } from '../types';
 import { getIndicatorText } from '../gameLogic';
 
 interface BottomToolbarProps {
