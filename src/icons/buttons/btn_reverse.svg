@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" width="40" height="40">
+  <!-- Up arrow -->
+  <polygon points="14,16 10,22 18,22" fill="#411b1a"/>
+  <rect x="12.5" y="22" width="3" height="10" fill="#411b1a"/>
+  <!-- Down arrow -->
+  <polygon points="26,24 22,18 30,18" fill="#fffef7" stroke="#411b1a" stroke-width="0.8"/>
+  <rect x="24.5" y="8" width="3" height="10" fill="#fffef7" stroke="#411b1a" stroke-width="0.8"/>
+</svg>

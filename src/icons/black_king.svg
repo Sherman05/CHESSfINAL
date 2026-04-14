@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 45 50">
+  <!-- King (Король) - Black -->
+  <!-- Cross on top -->
+  <line x1="22.5" y1="2" x2="22.5" y2="10" stroke="#ccc" stroke-width="2" stroke-linecap="round"/>
+  <line x1="18.5" y1="6" x2="26.5" y2="6" stroke="#ccc" stroke-width="2" stroke-linecap="round"/>
+  <!-- Crown band -->
+  <path d="M15 13 Q16 10 18.5 12 Q20.5 14 22.5 10 Q24.5 14 26.5 12 Q29 10 30 13 L30 16 L15 16 Z"
+        fill="#333" stroke="#ccc" stroke-width="1.5" stroke-linejoin="round"/>
+  <!-- Head -->
+  <ellipse cx="22.5" cy="19" rx="9" ry="4" fill="#333" stroke="#ccc" stroke-width="1.5"/>
+  <!-- Neck -->
+  <path d="M18 22 L17 28 L28 28 L27 22" fill="#333" stroke="#ccc" stroke-width="1.5" stroke-linejoin="round"/>
+  <!-- Body -->
+  <path d="M14 28 Q13 34 12 38 L33 38 Q32 34 31 28 Z"
+        fill="#333" stroke="#ccc" stroke-width="1.5" stroke-linejoin="round"/>
+  <!-- Waist line -->
+  <line x1="15" y1="33" x2="30" y2="33" stroke="#ccc" stroke-width="1"/>
+  <!-- Base -->
+  <path d="M10 38 L10 42 Q10 45 14 45 L31 45 Q35 45 35 42 L35 38 Z"
+        fill="#333" stroke="#ccc" stroke-width="1.5" stroke-linejoin="round"/>
+  <!-- Base line -->
+  <line x1="10" y1="41" x2="35" y2="41" stroke="#ccc" stroke-width="1"/>
+</svg>
